@@ -1,0 +1,28 @@
+# REQUIREMENTS FILE FOR EduChain PROJECT. TO INSTALL DEPENDENCIES, RUN:
+# pip install -r requirements.txt
+
+# Web framework
+Flask==3.0.3
+
+# Database ORM
+Flask-SQLAlchemy==3.1.1
+
+# Database migrations
+Flask-Migrate==4.0.7
+
+# Environment variables from .env
+python-dotenv==1.0.1
+
+# Optional but highly recommended for future features:
+
+# HTTP client (for external APIs, blockchain nodes, etc.)
+requests==2.32.3
+
+# Password hashing (when you add user accounts)
+bcrypt==4.2.0
+
+# JWT tokens (for secure auth in Telegram Mini App backend)
+PyJWT==2.8.0
+
+# Telegram Bot API (if you integrate a bot later)
+python-telegram-bot==21.4
