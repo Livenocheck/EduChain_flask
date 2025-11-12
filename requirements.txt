@@ -26,3 +26,7 @@ PyJWT==2.8.0
 
 # Telegram Bot API (if you integrate a bot later)
 python-telegram-bot==21.4
+
+werkzeug==3.0.3
+
+pytonlib==0.3.0
