@@ -20,6 +20,9 @@ def create_app():
     
     # Инициализируем БД
     db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
     
     # Инициализируем миграции
     migrate = Migrate(app, db)

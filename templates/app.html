@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script>
+  // Получаем initData
+  const initData = Telegram.WebApp.initData;
+  
+  // Если нет initData — значит, страница открыта не из Telegram
+  if (!initData) {
+    window.location.href = '/admin/login';  // Редирект на главную
+  }
+  
+  // Иначе — отображаем контент
+  document.getElementById('app-content').style.display = 'block';
+</script>
+
 <style>
   .top-bar {
     background: white;
