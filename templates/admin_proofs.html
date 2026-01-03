@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-header" style="background: var(--dark); color: white; padding: 20px; margin: -16px -16px 20px -16px;">
+  <h1 style="margin: 0; display: flex; gap: 20px; align-items: center;">
+    📄 Доказательства
+    <a href="/admin" style="color: white; text-decoration: underline;">← Назад в админку</a>
+  </h1>
+</div>
+
+{% for proof in proofs %}
+<div class="card">
+  <h3>{{ proof.title }}</h3>
+  <p><strong>Ученик:</strong> {{ proof.user.name }}</p>
+  <p><strong>Статус:</strong> {{ proof.status }}</p>
+  <p>{{ proof.description }}</p>
+  <a href="/static/uploads/{{ proof.filename }}" target="_blank" class="btn btn-primary" style="background: #4CAF50;">
+    Просмотреть файл
+  </a>
+</div>
+{% endfor %}
+{% endblock %}

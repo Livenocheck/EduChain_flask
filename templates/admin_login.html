@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 400px; margin: 50px auto;">
+  <div class="card">
+    <h2 style="text-align: center; margin-top: 0; color: var(--dark);">
+      🔐 Админка EduChain
+    </h2>
+    
+    <!-- Исправлено: добавлен action -->
+    <form method="POST" action="{{ url_for('admin.admin_login') }}">
+      <input type="password" name="password" placeholder="Пароль администратора" required>
+      <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+    
+    <!-- Сообщение об ошибке -->
+    {% if error %}
+    <p style="color: var(--danger); text-align: center; margin-top: 10px;">{{ error }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

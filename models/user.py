@@ -6,5 +6,5 @@ class User(db.Model):
     # vk_id = db.column(db.BigInteger, unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'), nullable=False)
-    role = db.Column(db.String(20), default="student")  # "student", "teacher", "admin"
-    recovery_code = db.Column(db.String(100), nullable=False)  # Код для восстановления доступа
+    role = db.Column(db.String(20), default="student")  # "student", "admin"
+    # ton_wallet = db.Column(db.String(100), nullable=True)

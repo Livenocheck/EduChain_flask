@@ -1,7 +1,14 @@
-from os import getenv #, path
+from os import getenv, path, makedirs
 
 class Config:
-    SECRET_DEV_KEY = getenv('SECRET_DEV_KEY')
+    if getenv('RENDER'):
+        DB_PATH = '/opt/render/project/src/instance/educhain.db'
+        makedirs(path.dirname(DB_PATH), exist_ok=True)
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{DB_PATH}'
+    else:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/educhain.db'
+    
+    #SECRET_KEY = getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = getenv('DATABASE_URI', 'sqlite:///educhain.db') # value, default
     SQLALCHEMY_TRACK_MODIFICATIONS = getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'False').lower() == 'true' 
     # /\ False (по умолчанию) отключает отслеживание изменений объектов, повышает производительность
@@ -10,6 +17,5 @@ class Config:
 
     # VK_API_TOKEN = getenv('VK_API_TOKEN')
 
-    # upload_folder = path.join(path.dirname(path.abspath(__file__)), 'static', 'uploads')
-    # ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
-    # MAX_CONTENT_LENGTH = 50 * 1024 * 1024 # 50 MB лимит на загрузку файлов
+    UPLOAD_FOLDER = path.join(path.dirname(path.abspath(__file__)), 'static', 'uploads')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024 

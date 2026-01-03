@@ -1,0 +1,1 @@
+from .telegram_auth import validate_telegram_init_data

@@ -1,29 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-    <h1>Привет, {{ first_name }}!</h1>
-    <p>Ваш ID: {{ user_id }}</p>
-    <button id="getBalance">Получить баланс</button>
-    <pre id="result"></pre>
+{% extends "base.html" %}
 
-    <script>
-        // Получаем initData от Telegram
-        const initData = Telegram.WebApp.initData;
-
-        // Кнопка для запроса баланса
-        document.getElementById('getBalance').onclick = async () => {
-            const response = await fetch('/api/balance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ initData: initData })
-            });
-            const result = await response.json();
-            document.getElementById('result').textContent = JSON.stringify(result, null, 2);
-        };
-    </script>
-</body>
-</html>
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 50px auto; width: 90%;">
+  <div class="card" style="text-align: center;">
+    <h1 style="margin: 0 0 20px 0; color: var(--primary);">
+      <div style="font-size: 48px;">🎓</div>
+      EduChain
+    </h1>
+    <p style="color: var(--text-light); margin-bottom: 30px;">
+      Панель управления школьной системой мотивации
+    </p>
+    
+    <a href="/admin/login" class="btn btn-primary" rel="noopener">🔑 Войти как админ</a>
+    
+    <div style="margin-top: 30px; padding: 16px; background: #e3f2fd; border-radius: 12px;">
+      <p style="margin: 0; color: #0d47a1;">
+        <strong>Ученикам:</strong><br>
+        Откройте приложение через бота в Telegram!<br>
+        <em>Этот сайт предназначен только для персонала школы.</em>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,4 +7,5 @@ class Transaction(db.Model):
     type = db.Column(db.String(20), nullable=False)  # 'award', 'purchase'
     amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(200))
+    reward_id = db.Column(db.Integer, db.ForeignKey('reward.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
