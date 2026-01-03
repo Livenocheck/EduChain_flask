@@ -96,6 +96,7 @@ def delete_reward(reward_id):
     return redirect(url_for('admin.admin_panel'))
 
 @bp.route('/proofs')
+@admin_required
 def view_proofs():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin.admin_login'))
@@ -104,6 +105,7 @@ def view_proofs():
     return render_template('admin_proofs.html', proofs=proofs)
 
 @bp.route('/logout')
+@admin_required
 def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('web.index'))
