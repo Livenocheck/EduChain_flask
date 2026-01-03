@@ -23,13 +23,14 @@ def create_app():
     
     # Регистрируем blueprints
     blueprints = (web_bp, admin_bp, main_bp, marketplace_bp, upload_bp)
-
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
     
     return app
 
-
 if __name__ == '__main__':
     app = create_app()
+    # Создаём таблицы при первом запуске (только для локальной разработки!)
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

@@ -8,11 +8,12 @@ from models.transaction import Transaction
 from models.school import School
 from models.proof import Proof
 from werkzeug.utils import secure_filename
+from functools import wraps
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 def admin_required(f):
-    """Декоратор для защиты маршрутов админки"""
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('admin_logged_in'):
             return redirect(url_for('admin.admin_login'))
@@ -44,7 +45,7 @@ def admin_panel():
 
 @bp.route('/award', methods=['POST'])
 @admin_required
-def award_tokens():
+def award():
     user_id = int(request.form['user_id'])
     amount = int(request.form['amount'])
     

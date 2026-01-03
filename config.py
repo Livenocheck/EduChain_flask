@@ -8,7 +8,7 @@ class Config:
     else:
         SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/educhain.db'
     
-    #SECRET_KEY = getenv('SECRET_KEY')
+    SECRET_KEY = getenv('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = getenv('DATABASE_URI', 'sqlite:///educhain.db') # value, default
     SQLALCHEMY_TRACK_MODIFICATIONS = getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'False').lower() == 'true' 
     # /\ False (по умолчанию) отключает отслеживание изменений объектов, повышает производительность

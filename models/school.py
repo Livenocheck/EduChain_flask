@@ -11,4 +11,3 @@ class School(db.Model):
  - Добавить его в кошелёк (Telegram Wallet, Tonkeeper)
  - Торговать на биржах (STON.fi, DeDust)
     '''
-    admin_code_hash = db.Column(db.String(128), nullable=False)  # хеш кода для админа школы
