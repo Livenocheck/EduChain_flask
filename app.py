@@ -7,6 +7,9 @@ from blueprints.main_bp import bp as main_bp
 from blueprints.marketplace import bp as marketplace_bp
 from blueprints.upload import bp as upload_bp
 from flask_migrate import Migrate
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)

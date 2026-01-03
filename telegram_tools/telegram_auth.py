@@ -8,24 +8,43 @@ from models.user import User
 from models.school import School
 from models.token_balance import TokenBalance
 
+# telegram_tools/telegram_auth.py
+import os
+import hmac
+import hashlib
+from urllib.parse import unquote
+
 def validate_init_data(init_data):
+    """
+    Проверяет подлинность initData от Telegram.
+    Возвращает словарь с данными или None, если проверка не пройдена.
+    """
     bot_token = os.getenv('BOT_TOKEN')
     if not bot_token or not init_data:
         return None
     
     try:
+        # Парсим параметры
         pairs = [pair.split('=', 1) for pair in init_data.split('&')]
         data = {key: unquote(value) for key, value in pairs}
         received_hash = data.pop('hash', None)
+        
         if not received_hash:
             return None
         
+        # Формируем строку для проверки
         data_check_string = '\n'.join(f"{k}={v}" for k, v in sorted(data.items()))
+        
+        # Генерируем секретный ключ
         secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+        
+        # Вычисляем хеш
         computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
         
+        # Сравниваем хеши
         if computed_hash != received_hash:
             return None
+        
         return data
     except Exception:
         return None
@@ -50,3 +69,4 @@ def get_or_create_student(telegram_id, name):
     db.session.commit()
     
     return user
+    
