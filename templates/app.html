@@ -1,91 +1,47 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div id="loading" style="text-align: center; padding: 50px;">
-  <div style="font-size: 48px;">⏳</div>
-  <p>Авторизация в Telegram...</p>
-</div>
-
-<div id="app-content" style="display: none;">
-  <style>
-    .top-bar {
-      background: white;
-      padding: 12px 16px;
-      margin: -16px -16px 20px -16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .balance { font-weight: bold; color: var(--success); font-size: 18px; }
-  </style>
-  
-  <div class="container">
-    <div class="top-bar">
-      <div class="balance">🪙 <span id="balance-value">0</span> токенов</div>
-    </div>
-    
-    <div class="card" style="text-align: center;">
-      <h2 style="margin: 0 0 16px 0;">👋 Привет, <span id="student-name">...</span>!</h2>
-      <p>Твоя EduChain-система готова к использованию</p>
-    </div>
-    
-    <button class="btn btn-primary" onclick="goToMarketplace()">🛒 Маркет</button>
-    <button class="btn btn-primary" onclick="goToUpload()">📤 Загрузить достижение</button>
-  </div>
-</div>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
-    // Не в Telegram → редирект на админку
-    window.location.href = '/admin';
-    return;
-  }
-  
-  const initData = Telegram.WebApp.initData;
-  if (!initData) {
-    // Mini App загружен без данных → ошибка
-    document.getElementById('loading').innerHTML = '<p>Ошибка: не удалось получить данные из Telegram</p>';
-    return;
-  }
-
-  let globalInitData = null;
-  
-  async function autoAuth() {
-    const initData = Telegram.WebApp.initData;
-    if (!initData) {
-      window.location.href = '/';
-      return;
-    }
-    
-    const response = await fetch('/tg_app/auth', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({initData: initData})
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>EduChain Test</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div id="status">Проверка Telegram API...</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const status = document.getElementById('status');
+      
+      if (typeof Telegram === 'undefined') {
+        status.innerHTML = '❌ Telegram API не загружен';
+        return;
+      }
+      
+      if (!Telegram.WebApp) {
+        status.innerHTML = '❌ WebApp не инициализирован';
+        return;
+      }
+      
+      const initData = Telegram.WebApp.initData;
+      if (initData) {
+        status.innerHTML = '✅ Успешно! initData получен.<br>' + 
+                          '<button onclick="testAuth()">Тест авторизации</button>';
+      } else {
+        status.innerHTML = '❌ initData пустой';
+      }
     });
     
-    const data = await response.json();
-    if (data.valid) {
-      globalInitData = data.initData;
-      document.getElementById('student-name').textContent = data.student.name;
-      document.getElementById('balance-value').textContent = data.balance;
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('app-content').style.display = 'block';
-    } else {
-      Telegram.WebApp.showAlert('Ошибка: ' + data.error);
-      setTimeout(() => window.location.href = '/', 2000);
+    function testAuth() {
+      fetch('./auth', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({initData: Telegram.WebApp.initData})
+      })
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('status').innerHTML += 
+          '<br>Ответ сервера: ' + JSON.stringify(data);
+      });
     }
-  }
-  
-  function goToMarketplace() {
-    window.location.href = '/marketplace?initData=' + encodeURIComponent(globalInitData);
-  }
-  
-  function goToUpload() {
-    window.location.href = '/upload?initData=' + encodeURIComponent(globalInitData);
-  }
-  
-  autoAuth();
-</script>
-{% endblock %}
+  </script>
+</body>
+</html>
