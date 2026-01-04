@@ -1,7 +1,7 @@
 from . import db
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True) # primary_key=True указывает на то что id - первичный ключ таблицы в БД
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     telegram_id = db.Column(db.BigInteger, unique=True, nullable=False)
     # vk_id = db.column(db.BigInteger, unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)

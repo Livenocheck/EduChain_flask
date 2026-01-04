@@ -1,47 +1,97 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>EduChain Test</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-  <div id="status">Проверка Telegram API...</div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const status = document.getElementById('status');
-      
-      if (typeof Telegram === 'undefined') {
-        status.innerHTML = '❌ Telegram API не загружен';
-        return;
-      }
-      
-      if (!Telegram.WebApp) {
-        status.innerHTML = '❌ WebApp не инициализирован';
-        return;
-      }
-      
-      const initData = Telegram.WebApp.initData;
-      if (initData) {
-        status.innerHTML = '✅ Успешно! initData получен.<br>' + 
-                          '<button onclick="testAuth()">Тест авторизации</button>';
-      } else {
-        status.innerHTML = '❌ initData пустой';
-      }
-    });
+{% extends "base.html" %}
+
+{% block content %}
+<div id="loading-screen" style="text-align: center; padding: 50px; display: none;">
+  <div style="font-size: 48px;">⏳</div>
+  <p>Авторизация через Telegram...</p>
+</div>
+
+<div id="app-content" style="display: none;">
+  <style>
+    .top-bar {
+      background: white;
+      padding: 12px 16px;
+      margin: -16px -16px 20px -16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .balance { font-weight: bold; color: var(--success); font-size: 18px; }
+  </style>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="balance">🪙 <span id="balance-value">0</span> токенов</div>
+    </div>
     
-    function testAuth() {
-      fetch('./auth', {
+    <div class="card" style="text-align: center;">
+      <h2 style="margin: 0 0 16px 0;">👋 Привет, <span id="student-name">...</span>!</h2>
+      <p>Твоя EduChain-система готова к использованию</p>
+    </div>
+    
+    <button class="btn btn-primary" onclick="window.location.href='/marketplace'">🛒 Маркет</button>
+    <button class="btn btn-primary" onclick="window.location.href='/upload'">📤 Загрузить достижение</button>
+  </div>
+</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  // Показываем экран загрузки сразу
+  document.getElementById('loading-screen').style.display = 'block';
+
+  // Автоматическая авторизация
+  async function autoAuth() {
+    // Проверяем, что мы в Telegram
+    if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
+      alert('Это приложение работает только в Telegram!');
+      return;
+    }
+    
+    const initData = Telegram.WebApp.initData;
+    if (!initData) {
+      alert('Не получены данные от Telegram');
+      return;
+    }
+
+    try {
+      const response = await fetch('/tg_app/auth', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({initData: Telegram.WebApp.initData})
-      })
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById('status').innerHTML += 
-          '<br>Ответ сервера: ' + JSON.stringify(data);
+        body: JSON.stringify({initData: initData})
       });
+
+      const data = await response.json();
+      
+      if (data.valid) {
+        // Сохраняем initData в localStorage для других страниц (опционально)
+        localStorage.setItem('initData', initData);
+        
+        // Показываем контент
+        document.getElementById('student-name').textContent = data.student.name;
+        document.getElementById('balance-value').textContent = data.balance;
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+        
+        // Обновляем initData в URL для других страниц
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('initData', initData);
+        window.history.replaceState({}, '', newUrl);
+      } else {
+        alert('Ошибка авторизации: ' + (data.error || 'неизвестная ошибка'));
+      }
+    } catch (error) {
+      alert('Ошибка сети: ' + error.message);
     }
-  </script>
-</body>
-</html>
+  }
+
+  // Кнопка "Назад" в Telegram
+  Telegram.WebApp.BackButton.show();
+  Telegram.WebApp.BackButton.onClick(function() {
+    Telegram.WebApp.close();
+  });
+
+  // Запускаем авторизацию
+  autoAuth();
+</script>
+{% endblock %}
