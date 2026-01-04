@@ -60,7 +60,7 @@
   const initData = urlParams.get('initData') || Telegram.WebApp.initData;
   
   if (!initData) {
-    window.location.href = '/tg_app/';
+    window.location.href = '/';
   }
 
   // Устанавливаем initData в форму
@@ -73,7 +73,7 @@
   });
 
   Telegram.WebApp.BackButton.show();
-  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/tg_app/');
+  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/');
 
   // Показываем контент
   document.getElementById('loading').style.display = 'none';
