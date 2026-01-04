@@ -16,24 +16,31 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('admin_logged_in'):
-            return redirect(url_for('admin.admin_login'))
+            return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
 
+@bp.route('/')
+def index():
+    # /admin → проверка сессии
+    if session.get('admin_logged_in'):
+        return redirect(url_for('admin.panel'))
+    return redirect(url_for('admin.login'))
+
 @bp.route('/login', methods=['GET', 'POST'])
-def admin_login():
+def login():
+    # Форма входа
     if request.method == 'POST':
-        if request.form['password'] == os.getenv('ADMIN_PASSWORD', 'admin123'):
+        if request.form['password'] == os.getenv('ADMIN_PASSWORD'):
             session['admin_logged_in'] = True
-            return redirect(url_for('admin.admin_panel'))
-        else:
-            # Передаём ошибку в шаблон
-            return render_template('admin_login.html', error="Неверный пароль")
+            return redirect(url_for('admin.panel'))
+        return render_template('admin_login.html', error="Неверный пароль")
     return render_template('admin_login.html')
+
 
 @bp.route('/panel')
 @admin_required
-def admin_panel():
+def panel():
     school = School.query.first()
     if not school:
         school = School(name="EduChain School")
@@ -58,7 +65,7 @@ def award():
     tx = Transaction(user_id=user_id, type='award', amount=amount, description="Начислено админом")
     db.session.add(tx)
     db.session.commit()
-    return redirect(url_for('admin.admin_panel'))
+    return redirect(url_for('admin.panel'))
 
 @bp.route('/add_reward', methods=['POST'])
 @admin_required
@@ -85,7 +92,7 @@ def add_reward():
     )
     db.session.add(reward)
     db.session.commit()
-    return redirect(url_for('admin.admin_panel'))
+    return redirect(url_for('admin.panel'))
 
 @bp.route('/delete_reward/<int:reward_id>', methods=['POST'])
 @admin_required
@@ -93,13 +100,13 @@ def delete_reward(reward_id):
     reward = Reward.query.get_or_404(reward_id)
     db.session.delete(reward)
     db.session.commit()
-    return redirect(url_for('admin.admin_panel'))
+    return redirect(url_for('admin.panel'))
 
 @bp.route('/proofs')
 @admin_required
 def view_proofs():
     if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.admin_login'))
+        return redirect(url_for('admin.login'))
     
     proofs = Proof.query.join(User).order_by(Proof.created_at.desc()).all()
     return render_template('admin_proofs.html', proofs=proofs)
@@ -108,4 +115,4 @@ def view_proofs():
 @admin_required
 def admin_logout():
     session.pop('admin_logged_in', None)
-    return redirect(url_for('web.index'))
+    return redirect(url_for('admin.login'))

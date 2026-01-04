@@ -1,7 +1,6 @@
 import os
 from flask import Flask
 from models import db
-from blueprints.web import bp as web_bp
 from blueprints.admin import bp as admin_bp
 from blueprints.main_bp import bp as main_bp
 from blueprints.marketplace import bp as marketplace_bp
@@ -28,7 +27,7 @@ def create_app():
     migrate = Migrate(app, db)
     
     # Регистрируем blueprints
-    blueprints = (web_bp, admin_bp, main_bp, marketplace_bp, upload_bp)
+    blueprints = (main_bp, admin_bp, marketplace_bp, upload_bp)
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
     

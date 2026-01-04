@@ -4,7 +4,7 @@ import json
 from models import db
 from models.token_balance import TokenBalance
 
-bp = Blueprint('main', __name__, url_prefix='/tg_app')
+bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def student_app():
