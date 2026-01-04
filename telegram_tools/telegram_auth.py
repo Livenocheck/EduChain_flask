@@ -54,7 +54,7 @@ def get_or_create_student(telegram_id, name):
     
     school = School.query.first()
     if not school:
-        school = School()
+        school = School(name='EduChain_school')
         db.session.add(school)
         db.session.commit()
     
