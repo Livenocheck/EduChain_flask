@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, redirect
 from werkzeug.utils import secure_filename
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
 import json
@@ -54,12 +54,7 @@ def upload_proof():
         
         # TODO: Сохранить в БД Proof (если нужно)
         
-        return '''
-        <!DOCTYPE html><html><body>
-            <script src="https://telegram.org/js/telegram-web-app.js"></script>
-            <script>Telegram.WebApp.showAlert("✅ Достижение отправлено на проверку!"); setTimeout(() => window.location.href="/tg_app/", 1500);</script>
-        </body></html>
-        '''
+        return redirect(f"/?initData={init_data}")
     except Exception as e:
         return '''
         <!DOCTYPE html><html><body>

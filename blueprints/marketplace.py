@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, redirect
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
 import json
 from models import db
@@ -103,9 +103,4 @@ def buy_reward(reward_id):
     db.session.add(tx)
     db.session.commit()
     
-    return f'''
-    <!DOCTYPE html><html><body>
-        <script src="https://telegram.org/js/telegram-web-app.js"></script>
-        <script>Telegram.WebApp.showAlert("Успешно! Новый баланс: {balance_obj.balance} 🪙"); setTimeout(() => window.location.href="/tg_app/", 1500);</script>
-    </body></html>
-    '''
+    return redirect(f"/?initData={init_data}")
