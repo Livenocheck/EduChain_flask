@@ -33,7 +33,7 @@
   const initData = urlParams.get('initData') || Telegram.WebApp.initData;
   
   if (!initData) {
-    window.location.href = '/tg_app/';
+    window.location.href = '/';
   }
 
   async function loadMarketplace() {
@@ -77,12 +77,12 @@
       document.getElementById('marketplace-content').style.display = 'block';
     } else {
       Telegram.WebApp.showAlert('Ошибка загрузки: ' + data.error);
-      setTimeout(() => window.location.href = '/tg_app/', 1500);
+      setTimeout(() => window.location.href = '/', 1500);
     }
   }
 
   Telegram.WebApp.BackButton.show();
-  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/tg_app/');
+  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/');
 
   loadMarketplace();
 </script>
