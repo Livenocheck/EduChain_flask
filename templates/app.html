@@ -37,6 +37,19 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
+  if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
+    // Не в Telegram → редирект на админку
+    window.location.href = '/admin';
+    return;
+  }
+  
+  const initData = Telegram.WebApp.initData;
+  if (!initData) {
+    // Mini App загружен без данных → ошибка
+    document.getElementById('loading').innerHTML = '<p>Ошибка: не удалось получить данные из Telegram</p>';
+    return;
+  }
+
   let globalInitData = null;
   
   async function autoAuth() {
