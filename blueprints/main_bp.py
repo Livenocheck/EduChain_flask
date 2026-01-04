@@ -41,4 +41,7 @@ def auth_student():
             "initData": init_data
         })
     except Exception as e:
-        return jsonify({"valid": False, "error": "Auth failed"}), 500
+        print(f"AUTH ERROR DETAILS: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"valid": False, "error": f"Server error: {str(e)}"}), 500
