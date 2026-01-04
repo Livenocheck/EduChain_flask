@@ -1,78 +1,82 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-  .top-bar {
-    background: white;
-    padding: 12px 16px;
-    margin: -16px -16px 20px -16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .balance { font-weight: bold; color: var(--success); font-size: 18px; }
-  .file-upload {
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    margin: 16px 0;
-    cursor: pointer;
-    background: #fafafa;
-  }
-  .file-upload:hover { border-color: var(--primary); }
-  #file-name { margin-top: 10px; font-weight: bold; color: var(--primary); }
-  .form-group { margin: 16px 0; }
-  label { display: block; margin-bottom: 6px; font-weight: bold; }
-</style>
+<div id="loading" style="text-align: center; padding: 50px;">
+  <div style="font-size: 48px;">📤</div>
+  <p>Проверка авторизации...</p>
+</div>
 
-<div class="container">
-  <div class="top-bar">
-    <div class="balance">🪙 {{ balance or 0 }} токенов</div>
-  </div>
-  
-  <div class="card">
-    <h2 style="margin: 0 0 20px 0;">📤 Загрузить достижение</h2>
+<div id="upload-content" style="display: none;">
+  <style>
+    .top-bar { background: white; padding: 12px 16px; margin: -16px -16px 20px -16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .balance { font-weight: bold; color: var(--success); font-size: 18px; }
+    .file-upload { border: 2px dashed #ccc; border-radius: 12px; padding: 30px; text-align: center; margin: 16px 0; cursor: pointer; background: #fafafa; }
+    .file-upload:hover { border-color: var(--primary); }
+    #file-name { margin-top: 10px; font-weight: bold; color: var(--primary); }
+    .form-group { margin: 16px 0; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+  </style>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="balance">🪙 <span id="balance-value">0</span> токенов</div>
+    </div>
     
-    <form method="POST" action="/upload/proof" enctype="multipart/form-data">
-      <input type="hidden" name="initData" value="{{ init_data|e }}">
+    <div class="card">
+      <h2 style="margin: 0 0 20px 0;">📤 Загрузить достижение</h2>
       
-      <div class="form-group">
-        <label>Название достижения *</label>
-        <input type="text" name="title" placeholder="Олимпиада по математике" required>
-      </div>
-      
-      <div class="form-group">
-        <label>Описание</label>
-        <textarea name="description" placeholder="Сертификат участника, 1 место"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label>Файл (PDF, JPG, PNG) *</label>
-        <div class="file-upload" onclick="document.getElementById('file').click()">
-          <div style="font-size: 48px; margin-bottom: 10px;">📁</div>
-          <p>Нажмите, чтобы выбрать файл</p>
-          <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" required>
-          <div id="file-name"></div>
+      <form id="upload-form" method="POST" action="/upload/proof" enctype="multipart/form-data">
+        <input type="hidden" name="initData" id="init-data-input">
+        
+        <div class="form-group">
+          <label>Название достижения *</label>
+          <input type="text" name="title" placeholder="Олимпиада по математике" required>
         </div>
-      </div>
-      
-      <button type="submit" class="btn btn-success">Отправить на проверку</button>
-    </form>
+        
+        <div class="form-group">
+          <label>Описание</label>
+          <textarea name="description" placeholder="Сертификат участника, 1 место"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Файл (PDF, JPG, PNG) *</label>
+          <div class="file-upload" onclick="document.getElementById('file').click()">
+            <div style="font-size: 48px; margin-bottom: 10px;">📁</div>
+            <p>Нажмите, чтобы выбрать файл</p>
+            <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" required>
+            <div id="file-name"></div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Отправить на проверку</button>
+      </form>
+    </div>
   </div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const initData = urlParams.get('initData') || Telegram.WebApp.initData;
+  
+  if (!initData) {
+    window.location.href = '/tg_app/';
+  }
+
+  // Устанавливаем initData в форму
+  document.getElementById('init-data-input').value = initData;
+
+  // Показ имени файла
   document.getElementById('file').addEventListener('change', function(e) {
     const name = e.target.files[0] ? e.target.files[0].name : '';
     document.getElementById('file-name').textContent = name;
   });
-  
+
   Telegram.WebApp.BackButton.show();
-  Telegram.WebApp.BackButton.onClick(function() {
-    window.location.href = '/tg_app/?initData=' + encodeURIComponent("{{ init_data|e }}");
-  });
+  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/tg_app/');
+
+  // Показываем контент
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('upload-content').style.display = 'block';
 </script>
 {% endblock %}
