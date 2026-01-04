@@ -15,38 +15,36 @@ import hashlib
 from urllib.parse import unquote
 
 def validate_init_data(init_data):
-    """
-    Проверяет подлинность initData от Telegram.
-    Возвращает словарь с данными или None, если проверка не пройдена.
-    """
     bot_token = os.getenv('BOT_TOKEN')
+    print(f"DEBUG: BOT_TOKEN = {bot_token[:10] if bot_token else 'None'}")
+    print(f"DEBUG: init_data length = {len(init_data) if init_data else 0}")
+    
     if not bot_token or not init_data:
+        print("DEBUG: Missing bot_token or init_data")
         return None
     
     try:
-        # Парсим параметры
         pairs = [pair.split('=', 1) for pair in init_data.split('&')]
         data = {key: unquote(value) for key, value in pairs}
         received_hash = data.pop('hash', None)
+        print(f"DEBUG: Received hash = {received_hash}")
         
         if not received_hash:
+            print("DEBUG: No hash in initData")
             return None
         
-        # Формируем строку для проверки
         data_check_string = '\n'.join(f"{k}={v}" for k, v in sorted(data.items()))
-        
-        # Генерируем секретный ключ
         secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
-        
-        # Вычисляем хеш
         computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
         
-        # Сравниваем хеши
+        print(f"DEBUG: Computed hash = {computed_hash}")
+        print(f"DEBUG: Hashes match = {computed_hash == received_hash}")
+        
         if computed_hash != received_hash:
             return None
-        
         return data
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG: Exception in validate_init_data: {e}")
         return None
 
 def get_or_create_student(telegram_id, name):
