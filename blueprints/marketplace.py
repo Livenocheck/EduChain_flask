@@ -1,6 +1,6 @@
 from flask import Blueprint, request, render_template, jsonify
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
-import jwt
+import json
 from models import db
 from models.user import User
 from models.token_balance import TokenBalance
@@ -24,7 +24,7 @@ def load_marketplace():
     if not data or 'user' not in data:
         return jsonify({"valid": False, "error": "Invalid auth"}), 400
     
-    user_data = jwt.decode(data['user'], options={"verify_signature": False})
+    user_data = json.loads(data['user'])
     user = get_or_create_student(user_data['id'], user_data.get('first_name', 'Аноним'))
     balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
     rewards = Reward.query.filter_by(school_id=user.school_id).all()
@@ -61,7 +61,7 @@ def buy_reward(reward_id):
         </body></html>
         '''
     
-    user_data = jwt.decode(data['user'], options={"verify_signature": False})
+    user_data = json.loads(data['user'])
     user = get_or_create_student(user_data['id'], user_data.get('first_name', 'Аноним'))
     reward = Reward.query.get(reward_id)
     

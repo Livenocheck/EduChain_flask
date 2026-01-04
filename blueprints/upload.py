@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, request, render_template
 from werkzeug.utils import secure_filename
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
-import jwt
+import json
 from models import db
 from models.token_balance import TokenBalance
 
@@ -33,7 +33,7 @@ def upload_proof():
         '''
     
     try:
-        user_data = jwt.decode(data['user'], options={"verify_signature": False})
+        user_data = json.loads(data['user'])
         user = get_or_create_student(user_data['id'], user_data.get('first_name', 'Аноним'))
         
         title = request.form.get('title', '').strip()

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
-import jwt
+import json
 from models import db
 from models.token_balance import TokenBalance
 
@@ -8,7 +8,6 @@ bp = Blueprint('main', __name__, url_prefix='/tg_app')
 
 @bp.route('/')
 def student_app():
-    # Только HTML — без авторизации
     return render_template('app.html')
 
 @bp.route('/auth', methods=['POST'])
@@ -27,7 +26,7 @@ def auth_student():
         return jsonify({"valid": False, "error": "Invalid auth"}), 400
     
     try:
-        user_data = jwt.decode(data['user'], options={"verify_signature": False})
+        user_data = json.loads(data['user'])
         user = get_or_create_student(user_data['id'], user_data.get('first_name', 'Аноним'))
         balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
         if not balance_obj:
