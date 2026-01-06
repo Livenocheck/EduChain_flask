@@ -86,7 +86,7 @@ def add_reward():
         name=request.form['name'],
         cost=int(request.form['cost']),
         description=request.form.get('description', ''),
-        image_filename=filename,
+        image_filename=f"static/uploads/{filename}",
         quantity=int(request.form['quantity']) if request.form.get('quantity') else None,
         school_id=school.id
     )

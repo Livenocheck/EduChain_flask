@@ -13,7 +13,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'False').lower() == 'true' 
     # /\ False (по умолчанию) отключает отслеживание изменений объектов, повышает производительность
     
-    TG_BOT_TOKEN = getenv('TG_BOT_TOKEN')
+    BOT_TOKEN = getenv('TG_BOT_TOKEN')
 
     # VK_API_TOKEN = getenv('VK_API_TOKEN')
 

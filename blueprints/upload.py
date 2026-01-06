@@ -47,7 +47,7 @@ def upload_proof():
     proof = Proof(
         user_id=user.id,
         title=title,
-        filename=filename,
+        filename=f"/static/uploads/{filename}",
         status="pending"
     )
 

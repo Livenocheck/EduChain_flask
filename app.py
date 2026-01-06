@@ -17,6 +17,7 @@ def create_app():
     # Создаём папку для загрузок
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
+    
     # Инициализируем БД
     db.init_app(app)
 
