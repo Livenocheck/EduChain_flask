@@ -1,0 +1,39 @@
+<!-- templates/history.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="top-bar">
+    <button class="btn-back" onclick="window.location.href='/inventory'">⬅️ Назад</button>
+    <h2>📜 История покупок</h2>
+  </div>
+
+  {% if purchases %}
+    {% for purchase in purchases %}
+      <div class="reward-item">
+        <h3>{{ rewards[purchase.reward_id].name if rewards.get(purchase.reward_id) else 'УДАЛЕНО' }}</h3>
+        <p>Потрачено: <strong>{{ purchase.amount }} 🪙</strong></p>
+        <p>Дата: {{ purchase.timestamp.strftime("%d.%m.%Y %H:%M") }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="card" style="text-align: center;">
+      <p>Нет покупок</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  /* Те же стили, что и в inventory.html */
+  .top-bar { background: white; padding: 12px 16px; margin: -16px -16px 20px -16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+  .btn-back { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  .reward-item { padding: 16px; border-radius: 16px; background: white; margin: 12px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+  .card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 16px 0; }
+</style>
+
+<script>
+  Telegram.WebApp.BackButton.show();
+  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/inventory');
+</script>
+{% endblock %}

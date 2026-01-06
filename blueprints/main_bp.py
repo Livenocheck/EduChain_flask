@@ -60,8 +60,40 @@ def auth_student():
 @student_required
 def inventory():
     user = User.query.get(session['user_id'])
-    purchases = Transaction.query.filter_by(user_id=user.id, type='purchase').all()
-    rewards = {p.reward_id: Reward.query.get(p.reward_id) for p in purchases}
+    
+    # Группируем купленные награды по ID + считаем количество
+    from sqlalchemy import func
+    purchased_rewards = db.session.query(
+        Transaction.reward_id,
+        Reward.name,
+        Reward.image_url,
+        func.count(Transaction.reward_id).label('quantity')
+    ).join(Reward, Transaction.reward_id == Reward.id)\
+     .filter(Transaction.user_id == user.id, Transaction.type == 'purchase')\
+     .group_by(Transaction.reward_id, Reward.name, Reward.image_url)\
+     .all()
+    
     balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
     balance = balance_obj.balance if balance_obj else 0
-    return render_template('inventory.html', student=user, balance=balance, purchases=purchases, rewards=rewards)
+    
+    return render_template(
+        'inventory.html',
+        student=user,
+        balance=balance,
+        rewards=purchased_rewards  # Список: (reward_id, name, image_url, quantity)
+    )
+
+@bp.route('/history')
+@student_required
+def purchase_history():
+    user = User.query.get(session['user_id'])
+    purchases = Transaction.query\
+        .filter_by(user_id=user.id, type='purchase')\
+        .order_by(Transaction.timestamp.desc())\
+        .all()
+    rewards = {p.reward_id: Reward.query.get(p.reward_id) for p in purchases}
+    
+    balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
+    balance = balance_obj.balance if balance_obj else 0
+    
+    return render_template('history.html', student=user, balance=balance, purchases=purchases, rewards=rewards)

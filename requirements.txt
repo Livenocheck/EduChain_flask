@@ -1,5 +1,6 @@
 flask
 flask-sqlalchemy
+sqlalchemy
 flask-migrate
 python-dotenv
 werkzeug

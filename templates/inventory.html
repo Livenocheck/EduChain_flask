@@ -1,3 +1,4 @@
+<!-- templates/inventory.html -->
 {% extends "base.html" %}
 
 {% block content %}
@@ -6,13 +7,15 @@
     <button class="btn-back" onclick="window.location.href='/'">⬅️ Назад</button>
     <h2>🎒 Инвентарь</h2>
   </div>
-  
-  {% if purchases %}
-    {% for purchase in purchases %}
+
+  {% if rewards %}
+    {% for reward in rewards %}
       <div class="reward-item">
-        <h3>{{ purchase.reward_name }}</h3>
-        <p>Потрачено: <strong>{{ purchase.cost }} 🪙</strong></p>
-        <p>Дата: {{ purchase.date }}</p>
+        <h3>{{ reward.name }}</h3>
+        {% if reward.image_url %}
+          <img src="{{ reward.image_url }}" class="reward-image">
+        {% endif %}
+        <p>Количество: <strong>{{ reward.quantity }}</strong></p>
       </div>
     {% endfor %}
   {% else %}
@@ -20,46 +23,19 @@
       <p>Пусто 🎒</p>
     </div>
   {% endif %}
+  
+  <button class="btn-secondary" onclick="window.location.href='/history'">📜 История покупок</button>
 </div>
 
 <style>
-  .top-bar {
-    background: white;
-    padding: 12px 16px;
-    margin: -16px -16px 20px -16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .btn-back {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  .reward-item {
-    padding: 16px;
-    border-radius: 16px;
-    background: white;
-    margin: 12px 0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  }
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 16px;
-  }
-  .card {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin: 16px 0;
-  }
+  /* Скопируйте стили из предыдущего inventory.html или marketplace.html */
+  .top-bar { background: white; padding: 12px 16px; margin: -16px -16px 20px -16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+  .btn-back { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+  .reward-item { padding: 16px; border-radius: 16px; background: white; margin: 12px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .reward-image { max-width: 100px; margin: 10px 0; border-radius: 8px; }
+  .btn-secondary { background: #6c757d; color: white; border: none; padding: 14px 24px; border-radius: 12px; font-size: 16px; cursor: pointer; width: 80%; max-width: 300px; margin-top: 20px; }
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+  .card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 16px 0; }
 </style>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
