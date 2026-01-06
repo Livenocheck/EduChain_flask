@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container">
   <div class="top-bar">
-    <button class="btn-back" onclick="window.location.href='/inventory'">⬅️ Назад</button>
+    <button class="btn-back" onclick="window.location.href='/'">⬅️ Назад</button>
     <h2>📜 История покупок</h2>
   </div>
 
@@ -34,6 +34,6 @@
 
 <script>
   Telegram.WebApp.BackButton.show();
-  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/inventory');
+  Telegram.WebApp.BackButton.onClick(() => window.location.href = '/');
 </script>
 {% endblock %}
