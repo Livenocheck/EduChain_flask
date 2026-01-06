@@ -13,9 +13,8 @@
   <p><strong>Ученик:</strong> {{ proof.user.name }}</p>
   <p><strong>Статус:</strong> {{ proof.status }}</p>
   <p>{{ proof.description }}</p>
-  <a href="/static/uploads/{{ proof.filename }}" target="_blank" class="btn btn-primary" style="background: #4CAF50;">
-    Просмотреть файл
-  </a>
+  <p style="text-align: center;">Фото:</p>
+  <img src="{{ proof.filename }}" class="reward-image">
 </div>
 {% endfor %}
 {% endblock %}
