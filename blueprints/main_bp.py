@@ -70,7 +70,7 @@ def inventory():
         func.count(Transaction.reward_id).label('quantity')
     ).join(Reward, Transaction.reward_id == Reward.id)\
      .filter(Transaction.user_id == user.id, Transaction.type == 'purchase')\
-     .group_by(Transaction.reward_id, Reward.name, Reward.image_url)\
+     .group_by(Transaction.reward_id, Reward.name, Reward.image_filename)\
      .all()
     
     balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
