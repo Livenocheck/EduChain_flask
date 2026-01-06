@@ -1,23 +1,36 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, render_template, jsonify, session, redirect, url_for
+from functools import wraps
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
 import json
 from models import db
+from models.user import User
 from models.token_balance import TokenBalance
+from models.transaction import Transaction
+from models.reward import Reward
 
-bp = Blueprint('main', __name__)
+bp = Blueprint('main', __name__, url_prefix='/')
+
+# Декоратор защиты для учеников
+def student_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated_function
 
 @bp.route('/')
 def student_app():
-    return render_template('app.html')
+    if 'user_id' not in session:
+        return render_template('app.html')
+    user = User.query.get(session['user_id'])
+    balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
+    balance = balance_obj.balance if balance_obj else 0
+    return render_template('app.html', authorized=True, student=user, balance=balance)
 
 @bp.route('/auth', methods=['POST'])
 def auth_student():
-    """AJAX-авторизация ученика"""
-    if request.is_json:
-        init_data = request.json.get('initData')
-    else:
-        init_data = request.form.get('initData')
-    
+    init_data = request.json.get('initData')
     if not init_data:
         return jsonify({"valid": False, "error": "No auth data"}), 400
     
@@ -34,14 +47,21 @@ def auth_student():
             db.session.add(balance_obj)
             db.session.commit()
         
+        session['user_id'] = user.id
         return jsonify({
             "valid": True,
             "student": {"id": user.id, "name": user.name},
-            "balance": balance_obj.balance,
-            "initData": init_data
+            "balance": balance_obj.balance
         })
     except Exception as e:
-        print(f"AUTH ERROR DETAILS: {e}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"valid": False, "error": f"Server error: {str(e)}"}), 500
+        return jsonify({"valid": False, "error": "Auth failed"}), 500
+
+@bp.route('/inventory')
+@student_required
+def inventory():
+    user = User.query.get(session['user_id'])
+    purchases = Transaction.query.filter_by(user_id=user.id, type='purchase').all()
+    rewards = {p.reward_id: Reward.query.get(p.reward_id) for p in purchases}
+    balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
+    balance = balance_obj.balance if balance_obj else 0
+    return render_template('inventory.html', student=user, balance=balance, purchases=purchases, rewards=rewards)
