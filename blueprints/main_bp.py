@@ -66,7 +66,7 @@ def inventory():
     purchased_rewards = db.session.query(
         Transaction.reward_id,
         Reward.name,
-        Reward.image_url,
+        Reward.image_filename,
         func.count(Transaction.reward_id).label('quantity')
     ).join(Reward, Transaction.reward_id == Reward.id)\
      .filter(Transaction.user_id == user.id, Transaction.type == 'purchase')\
