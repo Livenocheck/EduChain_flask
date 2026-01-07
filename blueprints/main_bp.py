@@ -22,7 +22,7 @@ def student_required(f):
 @bp.route('/')
 def student_app():
     if 'user_id' not in session:
-        return render_template('app.html')
+        return render_template('app.html', authorized=False, student=None)
     user = User.query.get(session['user_id'])
     if not user.verified and not user.verification_requested:
         return redirect('/profile')
