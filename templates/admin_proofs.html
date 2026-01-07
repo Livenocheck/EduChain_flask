@@ -14,10 +14,15 @@
       <p>{{ proof.description or 'Без описания' }}</p>
       
       {% if proof.filename %}
-        <img src="{{ proof.filename }}" 
+        {% if proof.filename.endswith('.pdf') %}
+          <iframe src="{{ proof.filename }}" 
+          style="width:100%; height:300px; border:1px solid #ccc;"></iframe>
+        {% else %}
+          <img src="{{ proof.filename }}"  
              class="proof-image" 
              onclick="openModal('{{ proof.filename }}')"
              alt="Достижение">
+        {% endif %}
       {% endif %}
       
       <form method="POST" action="/admin/proof/{{ proof.id }}/approve" style="display:inline;">

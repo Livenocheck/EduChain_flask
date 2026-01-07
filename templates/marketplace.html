@@ -25,7 +25,7 @@
       <div class="reward">
         <h3>{{ reward.name }}</h3>
         {% if reward.image_filename %}
-          <img src="{{ reward.image_filename }}" class="reward-image">
+          <img src="{{ url_for('static', filename='uploads/' + reward.filename) }}">
         {% endif %}
         <p>{{ reward.description or '' }}</p>
         <p><strong>{{ reward.cost }} 🪙</strong></p>
