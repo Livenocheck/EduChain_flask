@@ -56,6 +56,9 @@ def auth_student():
             "balance": balance_obj.balance
         })
     except Exception as e:
+        print(f"❌ AUTH ERROR DETAILS: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"valid": False, "error": "Auth failed"}), 500
     
 @bp.route('/profile', methods=['GET', 'POST'])
