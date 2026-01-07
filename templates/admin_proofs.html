@@ -42,111 +42,64 @@
   </div>
 {% endif %}
 
-<!-- Модальное окно для увеличения -->
-<div id="imageModal" class="modal" onclick="closeModal()">
-  <img id="modalImage" class="modal-content">
+<!-- Модальное окно для изображений -->
+<div id="imageModal" style="
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  z-index: 2000;
+  overflow: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+  ">
+    <img id="modalImage" style="
+      display: block;
+      max-width: 100%;
+      max-height: 90vh;
+      height: auto;
+      width: auto;
+      image-rendering: -webkit-optimize-contrast;
+    ">
+  </div>
+  <span onclick="closeModal()" style="
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    user-select: none;
+  ">&times;</span>
 </div>
 
-<style>
-  .top-bar {
-    background: #1a237e;
-    padding: 16px;
-    margin: -16px -16px 24px -16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-  }
-  .top-bar h2 {
-    margin: 0;
-    font-size: 24px;
-    color: white;
-  }
-  .btn-back {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 18px;
-  }
-  .btn-back:hover {
-    background: rgba(255,255,255,0.3);
-  }
-  .card {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    margin: 16px 0;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-  }
-  .proof-image {
-    max-width: 200px;
-    max-height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 12px 0;
-    transition: transform 0.2s;
-  }
-  .proof-image:hover {
-    transform: scale(1.05);
-  }
-  .btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    margin: 4px;
-  }
-  .btn-success {
-    background: #28a745;
-    color: white;
-  }
-  .btn-danger {
-    background: #dc3545;
-    color: white;
-  }
-  
-  /* Модальное окно */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.9);
-  }
-  .modal-content {
-    margin: auto;
-    display: block;
-    width: 80%;
-    max-width: 700px;
-    max-height: 80vh;
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-</style>
-
 <script>
-  function openModal(src) {
-    document.getElementById('modalImage').src = src;
-    document.getElementById('imageModal').style.display = 'block';
-  }
-  
-  function closeModal() {
-    document.getElementById('imageModal').style.display = 'none';
-  }
-  
-  // Закрытие по клавише Esc
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-  });
+function openImageModal(src) {
+  const img = document.getElementById('modalImage');
+  img.src = src;
+  // Сбросить размеры на случай кэширования
+  img.style.width = '';
+  img.style.height = '';
+  document.getElementById('imageModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('imageModal').style.display = 'none';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
 </script>
 {% endblock %}
