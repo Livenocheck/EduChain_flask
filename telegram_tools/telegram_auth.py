@@ -58,7 +58,7 @@ def get_or_create_student(telegram_id, name):
         db.session.add(school)
         db.session.commit()
     
-    user = User(telegram_id=telegram_id, name=name, school_id=school.id, role="student")
+    user = User(telegram_id=telegram_id, first_name=name, school_id=school.id, role="student")
     db.session.add(user)
     db.session.commit()
     
