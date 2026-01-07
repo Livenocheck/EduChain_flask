@@ -52,7 +52,7 @@ def auth_student():
         session['user_id'] = user.id
         return jsonify({
             "valid": True,
-            "student": {"id": user.id, "name": user.name},
+            "student": {"id": user.id, "name": user.first_name},
             "balance": balance_obj.balance
         })
     except Exception as e:
