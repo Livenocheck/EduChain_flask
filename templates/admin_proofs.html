@@ -2,20 +2,21 @@
 
 {% block content %}
 <div class="top-bar">
+  <p style="text-align: center;">📤 Достижения</p>
   <button class="btn-back" onclick="window.location.href='/admin/panel'">⬅️ Назад</button>
-  <h2>📤 Достижения</h2>
+  <!--h2>📤 Достижения</h2-->
 </div>
 
 {% if proofs %}
   {% for proof in proofs %}
     <div class="card">
-      <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }}</p>
+      <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }} {{ proof.user.grade }}</p>
       <p>{{ proof.description or 'Без описания' }}</p>
       
       {% if proof.filename %}
-        <img src="/static/uploads/{{ proof.filename }}" 
+        <img src="{{ url_for('static', filename='uploads' + proof.filename) }}" 
              class="proof-image" 
-             onclick="openModal('/static/uploads/{{ proof.filename }}')"
+             onclick="openModal('/static/uploads{{ proof.filename }}')"
              alt="Достижение">
       {% endif %}
       
@@ -43,7 +44,7 @@
 
 <style>
   .top-bar {
-    background: #007bff;
+    background: #1a237e;
     padding: 16px;
     margin: -16px -16px 24px -16px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
