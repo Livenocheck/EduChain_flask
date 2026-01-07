@@ -1,0 +1,18 @@
+<!-- Аналогично другим страницам админки -->
+<h2>🔍 Верификация учеников</h2>
+{% for user in users %}
+  <div class="card">
+    <p><strong>{{ user.last_name }} {{ user.first_name }}</strong> ({{ user.grade }})</p>
+    <p>Telegram ID: {{ user.telegram_id }}</p>
+    <p>Код школы: {{ user.school_code or '—' }}</p>
+
+    <form method="POST" action="/admin/verify/{{ user.id }}" style="display:inline;">
+      <button type="submit" class="btn btn-success">✅ Принять</button>
+    </form>
+
+     <form method="POST" action="/admin/reject_verification/{{ user.id }}" style="display:inline; margin-left:10px;">
+      <input type="text" name="reason" placeholder="Причина (опционально)" style="width:150px; padding:4px; margin-right:8px;">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Отклонить верификацию?')">❌ Отклонить</button>
+    </form>
+  </div>
+{% endfor %}

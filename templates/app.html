@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% if not student.verified and not student.verification_requested %}
+  <script>
+    window.location.href = '/profile';
+  </script>
+{% endif %}
+
 {% if authorized %}
 <div class="container">
   <div class="top-bar">

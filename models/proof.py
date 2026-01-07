@@ -9,5 +9,6 @@ class Proof(db.Model):
     filename = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), default="pending")  # pending, approved, rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    tokens_awarded = db.Column(db.Integer, default=0)
 
     user = db.relationship("User", backref="proofs")

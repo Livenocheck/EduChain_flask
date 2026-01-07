@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, render_template, redirect, url_for, session
+from flask import Blueprint, request, render_template, redirect, url_for, session, flash
 from models import db
 from models.user import User
 from models.token_balance import TokenBalance
@@ -105,11 +105,71 @@ def delete_reward(reward_id):
 @bp.route('/proofs')
 @admin_required
 def view_proofs():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.login'))
-    
-    proofs = Proof.query.join(User).order_by(Proof.created_at.desc()).all()
-    return render_template('admin_proofs.html', proofs=proofs)
+    pending_proofs = Proof.query.filter_by(status="pending").all()
+    return render_template('admin_proofs.html', proofs=pending_proofs)
+
+@bp.route('/proof/<int:proof_id>/approve', methods=['POST'])
+@admin_required
+def approve_proof(proof_id):
+    proof = Proof.query.get(proof_id)
+    if proof:
+        tokens = int(request.form.get('tokens', 0))
+        proof.status = "approved"
+        proof.tokens_awarded = tokens
+        
+        # Начисляем токены ученику
+        balance = TokenBalance.query.filter_by(user_id=proof.user_id).first()
+        if balance:
+            balance.balance += tokens
+        else:
+            db.session.add(TokenBalance(user_id=proof.user_id, balance=tokens))
+        
+        db.session.commit()
+        flash(f"✅ Достижение одобрено! Начислено {tokens} токенов", "success")
+    return redirect('/admin/proofs')
+
+@bp.route('/proof/<int:proof_id>/reject', methods=['POST'])
+@admin_required
+def reject_proof(proof_id):
+    proof = Proof.query.get(proof_id)
+    if proof:
+        proof.status = "rejected"
+        db.session.commit()
+        flash("❌ Достижение отклонено", "error")
+    return redirect('/admin/proofs')
+
+@bp.route('/verification')
+@admin_required
+def verification():
+    users = User.query.filter_by(
+        verification_requested=True,
+        verified=False
+    ).all()
+    return render_template('admin_verification.html', users=users)
+
+@bp.route('/verify/<int:user_id>', methods=['POST'])
+@admin_required
+def verify_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.verified = True
+        db.session.commit()
+        flash("✅ Ученик верифицирован!", "success")
+    return redirect('/admin/verification')
+
+@bp.route('/reject_verification/<int:user_id>', methods=['POST'])
+@admin_required
+def reject_verification(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.verification_rejected = True
+        user.verification_requested = False  # Сбросить запрос
+        reason = request.form.get('reason', '').strip()
+        if reason:
+            user.rejection_reason = reason
+        db.session.commit()
+        flash("❌ Верификация отклонена", "error")
+    return redirect('/admin/verification')
 
 @bp.route('/logout')
 @admin_required

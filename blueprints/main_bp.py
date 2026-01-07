@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, jsonify, session, redirect, url_for
+from flask import Blueprint, request, render_template, jsonify, session, redirect, url_for, flash
 from functools import wraps
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
 import json
@@ -20,10 +20,13 @@ def student_required(f):
     return decorated_function
 
 @bp.route('/')
+@student_required
 def student_app():
     if 'user_id' not in session:
         return render_template('app.html')
     user = User.query.get(session['user_id'])
+    if not user.verified and not user.verification_requested:
+        return redirect('/profile')
     balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
     balance = balance_obj.balance if balance_obj else 0
     return render_template('app.html', authorized=True, student=user, balance=balance)
@@ -55,13 +58,33 @@ def auth_student():
         })
     except Exception as e:
         return jsonify({"valid": False, "error": "Auth failed"}), 500
+    
+@bp.route('/profile', methods=['GET', 'POST'])
+@student_required
+def profile():
+    user = User.query.get(session['user_id'])
+    if user.verified:
+        return redirect('/')
+    
+    if request.method == 'POST':
+        user.first_name = request.form['first_name'].strip()
+        user.last_name = request.form['last_name'].strip()
+        user.grade = request.form['grade'].strip()
+        user.school_code = request.form.get('school_code', '').strip()
+        user.verification_requested = True
+        user.verification_rejected = False  # ← сбросить статус отклонения
+        user.rejection_reason = None
+        db.session.commit()
+        flash("✅ Данные отправлены на повторную верификацию!", "success")
+        return redirect('/')
+    
+    return render_template('profile.html', user=user)
 
 @bp.route('/inventory')
 @student_required
 def inventory():
     user = User.query.get(session['user_id'])
     
-    # Группируем купленные награды по ID + считаем количество
     from sqlalchemy import func
     purchased_rewards = db.session.query(
         Transaction.reward_id,

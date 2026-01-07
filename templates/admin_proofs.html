@@ -1,20 +1,20 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="admin-header" style="background: var(--dark); color: white; padding: 20px; margin: -16px -16px 20px -16px;">
-  <h1 style="margin: 0; display: flex; gap: 20px; align-items: center;">
-    📄 Доказательства
-    <a href="/admin/panel" style="color: white; text-decoration: underline;">← Назад в админку</a>
-  </h1>
-</div>
-
 {% for proof in proofs %}
-<div class="card">
-  <h3>{{ proof.title }}</h3>
-  <p><strong>Ученик:</strong> {{ proof.user.name }}</p>
-  <p><strong>Статус:</strong> {{ proof.status }}</p>
-  <p>{{ proof.description }}</p>
-  <p style="text-align: center;">Фото:</p>
-  <img src="{{ proof.filename }}" class="reward-image">
-</div>
+  <div class="card">
+    <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }}</p>
+    <p>{{ proof.description }}</p>
+    
+    <!-- Уменьшенное фото -->
+    {% if proof.filename %}
+      <img src="/static/uploads/{{ proof.filename }}" style="max-width:150px; max-height:150px; object-fit:cover;">
+    {% endif %}
+    
+    <form method="POST" action="/admin/proof/{{ proof.id }}/approve" style="display:inline;">
+      <input type="number" name="tokens" value="10" min="0" style="width:80px; margin-right:10px;">
+      <button type="submit" class="btn btn-success">✅ Принять + токены</button>
+    </form>
+    
+    <form method="POST" action="/admin/proof/{{ proof.id }}/reject" style="display:inline;">
+      <button type="submit" class="btn btn-danger">❌ Отклонить</button>
+    </form>
+  </div>
 {% endfor %}
-{% endblock %}
