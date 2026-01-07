@@ -1,3 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="top-bar">
+  <button class="btn-back" onclick="window.location.href='/admin/panel'">⬅️ Назад</button>
+  <h2>📤 Достижения</h2>
+</div>
+
 {% for proof in proofs %}
   <div class="card">
     <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }}</p>
@@ -18,3 +27,5 @@
     </form>
   </div>
 {% endfor %}
+
+{% endblock %}

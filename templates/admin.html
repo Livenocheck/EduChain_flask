@@ -49,6 +49,7 @@
 <div class="admin-header">
   <h1>👨‍🏫 Админка EduChain</h1>
   <div style="display: flex; gap: 10px; align-items: center;">
+    <a href="/admin/verification" class="proofs-link">🔍 Верификация</a>
     <a href="/admin/proofs" class="proofs-link">📄 Доказательства</a>
     <a href="/admin/logout" class="proofs-link" style="background: rgba(244,67,54,0.2);">🚪 Выйти</a>
   </div>
@@ -62,7 +63,7 @@
         <select name="user_id" required>
           <option value="">Выберите ученика</option>
           {% for student in students %}
-          <option value="{{ student.id }}">{{ student.name }}</option>
+          <option value="{{ student.id }}">{{ student.last_name }} {{ student.first_name }} {{ student.grade }}</option>
           {% endfor %}
         </select>
         <input type="number" name="amount" min="1" placeholder="Сумма" required>

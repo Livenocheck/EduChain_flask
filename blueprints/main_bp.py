@@ -20,11 +20,12 @@ def student_required(f):
     return decorated_function
 
 @bp.route('/')
+@student_required
 def student_app():
     if 'user_id' not in session:
         return render_template('app.html', authorized=False, student=None)
     user = User.query.get(session['user_id'])
-    if not user.verified and not user.verification_requested:
+    if not user.verified:
         return redirect('/profile')
     balance_obj = TokenBalance.query.filter_by(user_id=user.id).first()
     balance = balance_obj.balance if balance_obj else 0
