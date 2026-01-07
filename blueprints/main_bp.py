@@ -20,7 +20,6 @@ def student_required(f):
     return decorated_function
 
 @bp.route('/')
-@student_required
 def student_app():
     if 'user_id' not in session:
         return render_template('app.html')
