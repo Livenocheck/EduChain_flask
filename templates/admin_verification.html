@@ -1,18 +1,85 @@
-<!-- Аналогично другим страницам админки -->
-<h2>🔍 Верификация учеников</h2>
-{% for user in users %}
-  <div class="card">
-    <p><strong>{{ user.last_name }} {{ user.first_name }}</strong> ({{ user.grade }})</p>
-    <p>Telegram ID: {{ user.telegram_id }}</p>
-    <p>Код школы: {{ user.school_code or '—' }}</p>
+{% extends "base.html" %}
 
-    <form method="POST" action="/admin/verify/{{ user.id }}" style="display:inline;">
-      <button type="submit" class="btn btn-success">✅ Принять</button>
-    </form>
+{% block content %}
+<div class="top-bar">
+  <button class="btn-back" onclick="window.location.href='/admin/panel'">⬅️ Назад</button>
+  <h2>🔍 Верификация учеников</h2>
+</div>
 
-     <form method="POST" action="/admin/reject_verification/{{ user.id }}" style="display:inline; margin-left:10px;">
-      <input type="text" name="reason" placeholder="Причина (опционально)" style="width:150px; padding:4px; margin-right:8px;">
-      <button type="submit" class="btn btn-danger" onclick="return confirm('Отклонить верификацию?')">❌ Отклонить</button>
-    </form>
+{% if users %}
+  {% for user in users %}
+    <div class="card">
+      <p><strong>{{ user.last_name }} {{ user.first_name }}</strong> ({{ user.grade }})</p>
+      <p>Telegram ID: {{ user.tg_user_id }}</p>
+      <p>Класс: {{ user.grade }}</p>
+      <p>Код школы: {{ user.school_code or '—' }}</p>
+      
+      <form method="POST" action="/admin/verify/{{ user.id }}" style="display:inline;">
+        <button type="submit" class="btn btn-success">✅ Принять</button>
+      </form>
+      
+      <form method="POST" action="/admin/reject_verification/{{ user.id }}" style="display:inline; margin-left:10px;">
+        <input type="text" name="reason" placeholder="Причина" style="width:120px; padding:4px; margin-right:8px; font-size:14px;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Точно отклонить?')">❌ Отклонить</button>
+      </form>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align: center;">
+    <p>Нет учеников, ожидающих верификации</p>
   </div>
-{% endfor %}
+{% endif %}
+
+<style>
+  .top-bar {
+    background: #007bff;  /* Синяя полоска как в админке */
+    padding: 16px;
+    margin: -16px -16px 24px -16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
+  .top-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+  }
+  .btn-back {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .btn-back:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 4px;
+  }
+  .btn-success {
+    background: #28a745;
+    color: white;
+  }
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+</style>
+{% endblock %}

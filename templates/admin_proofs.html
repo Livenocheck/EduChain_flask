@@ -1,31 +1,146 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <div class="top-bar">
   <button class="btn-back" onclick="window.location.href='/admin/panel'">⬅️ Назад</button>
   <h2>📤 Достижения</h2>
 </div>
 
-{% for proof in proofs %}
-  <div class="card">
-    <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }}</p>
-    <p>{{ proof.description }}</p>
-    
-    <!-- Уменьшенное фото -->
-    {% if proof.filename %}
-      <img src="/static/uploads/{{ proof.filename }}" style="max-width:150px; max-height:150px; object-fit:cover;">
-    {% endif %}
-    
-    <form method="POST" action="/admin/proof/{{ proof.id }}/approve" style="display:inline;">
-      <input type="number" name="tokens" value="10" min="0" style="width:80px; margin-right:10px;">
-      <button type="submit" class="btn btn-success">✅ Принять + токены</button>
-    </form>
-    
-    <form method="POST" action="/admin/proof/{{ proof.id }}/reject" style="display:inline;">
-      <button type="submit" class="btn btn-danger">❌ Отклонить</button>
-    </form>
+{% if proofs %}
+  {% for proof in proofs %}
+    <div class="card">
+      <p><strong>{{ proof.title }}</strong> — {{ proof.user.last_name }} {{ proof.user.first_name }}</p>
+      <p>{{ proof.description or 'Без описания' }}</p>
+      
+      {% if proof.filename %}
+        <img src="/static/uploads/{{ proof.filename }}" 
+             class="proof-image" 
+             onclick="openModal('/static/uploads/{{ proof.filename }}')"
+             alt="Достижение">
+      {% endif %}
+      
+      <form method="POST" action="/admin/proof/{{ proof.id }}/approve" style="display:inline;">
+        <input type="number" name="tokens" value="10" min="0" 
+               style="width:80px; padding:6px; margin-right:10px; font-size:14px;">
+        <button type="submit" class="btn btn-success">✅ Принять + токены</button>
+      </form>
+      
+      <form method="POST" action="/admin/proof/{{ proof.id }}/reject" style="display:inline;">
+        <button type="submit" class="btn btn-danger">❌ Отклонить</button>
+      </form>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align: center;">
+    <p>Нет достижений, ожидающих проверки</p>
   </div>
-{% endfor %}
+{% endif %}
 
+<!-- Модальное окно для увеличения -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <img id="modalImage" class="modal-content">
+</div>
+
+<style>
+  .top-bar {
+    background: #007bff;
+    padding: 16px;
+    margin: -16px -16px 24px -16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
+  .top-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+  }
+  .btn-back {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .btn-back:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .proof-image {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 12px 0;
+    transition: transform 0.2s;
+  }
+  .proof-image:hover {
+    transform: scale(1.05);
+  }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 4px;
+  }
+  .btn-success {
+    background: #28a745;
+    color: white;
+  }
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+  
+  /* Модальное окно */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+  }
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    max-height: 80vh;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+</style>
+
+<script>
+  function openModal(src) {
+    document.getElementById('modalImage').src = src;
+    document.getElementById('imageModal').style.display = 'block';
+  }
+  
+  function closeModal() {
+    document.getElementById('imageModal').style.display = 'none';
+  }
+  
+  // Закрытие по клавише Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
 {% endblock %}
