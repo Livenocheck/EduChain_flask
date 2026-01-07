@@ -14,9 +14,9 @@
       <p>{{ proof.description or 'Без описания' }}</p>
       
       {% if proof.filename %}
-        <img src="{{ url_for('static', filename='uploads' + proof.filename) }}" 
+        <img src="{{ proof.filename }}" 
              class="proof-image" 
-             onclick="openModal('/static/uploads{{ proof.filename }}')"
+             onclick="openModal('{{ proof.filename }}')"
              alt="Достижение">
       {% endif %}
       
