@@ -77,10 +77,10 @@ def profile():
         user.verification_rejected = False  # ← сбросить статус отклонения
         user.rejection_reason = None
         db.session.commit()
-        flash("✅ Данные отправлены на повторную верификацию!", "success")
-        return redirect('/')
+        flash("✅ Данные отправлены на верификацию! Можете закрыть приложение, верификация займет время", "success")
+        #return redirect('/')
     
-    return render_template('profile.html', user=user)
+    return render_template('profile.html', user=user, show_message=True)
 
 @bp.route('/inventory')
 @student_required
