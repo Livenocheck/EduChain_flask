@@ -80,8 +80,17 @@ def award():
         except Exception as e:
             flash(f"❌ Ошибка Jetton: {str(e)}", "error")
     else:
-        # Выдача обычных токенов (ваш существующий функционал)
-        user.tokens = (user.tokens or 0) + int(amount)
+        # Выдача обычных токенов через TokenBalance
+        from models.token_balance import TokenBalance
+        
+        # Получаем или создаём запись баланса
+        token_balance = TokenBalance.query.filter_by(user_id=user_id).first()
+        if not token_balance:
+            token_balance = TokenBalance(user_id=user_id, balance=0)
+            db.session.add(token_balance)
+        
+        # Обновляем баланс
+        token_balance.balance += int(amount)
         db.session.commit()
         flash(f"✅ Выдано {int(amount)} токенов ученику {user.last_name}!", "success")
     
