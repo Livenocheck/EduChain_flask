@@ -50,7 +50,7 @@ def panel():
         school = School(name="EduChain School")
         db.session.add(school)
         db.session.commit()
-    students = User.query.filter_by(school_id=school.id).all()
+    students = User.query.filter_by(school_id=school.id, verified=True, role="student").all()
     rewards = Reward.query.filter_by(school_id=school.id).all()
     return render_template('admin.html', students=students, rewards=rewards)
 
