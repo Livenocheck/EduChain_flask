@@ -1,58 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-  <h2>👛 Мой TON-кошелёк</h2>
-  
-  <!-- TON Connect (основной способ) -->
-  <div id="ton-connect-button"></div>
-  
-  <!-- Или ручной ввод -->
-  <div style="margin: 30px 0; padding: 20px; border: 1px dashed #ccc; border-radius: 8px;">
-    <h3>Или укажите адрес вручную:</h3>
-    <form method="POST" action="/update_wallet">
-      <input type="text" name="ton_wallet" 
-             value="{{ user.ton_wallet or '' }}" 
-             placeholder="UQA... или EQA..."
-             style="width:100%; padding:10px; margin:10px 0;">
-      <button type="submit" class="btn btn-primary">Сохранить</button>
-    </form>
-  </div>
-  
-  {% if user.ton_wallet %}
-    <p>Текущий кошелёк: <code>{{ user.ton_wallet }}</code></p>
-  {% endif %}
-</div>
-
 <style>
-  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
-  .btn { background: #0088cc; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; }
+  .top-bar {
+    background: #007bff;
+    padding: 16px;
+    margin: -16px -16px 24px -16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
+  .top-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+  }
+  .btn-back {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    text-decoration: none;
+  }
+  .btn-back:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  .container { 
+    max-width: 600px; 
+    margin: 0 auto; 
+    padding: 16px; 
+  }
+  .btn { 
+    background: #0088cc; 
+    color: white; 
+    border: none; 
+    padding: 12px 24px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    width: 100%;
+  }
 </style>
 
-<!-- TON Connect SDK -->
-<script src="https://unpkg.com/@tonconnect/ui@1.0.0/dist/tonconnect-ui.min.js"></script>
-<script>
-  // Инициализация TON Connect
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://{{ DOMAIN }}/tonconnect-manifest.json',
-    buttonRootId: 'ton-connect-button'
-  });
+<div class="top-bar">
+  <a href="/" class="btn-back">⬅️ Назад</a>
+  <h2>👛 Мой TON-кошелёк</h2>
+  <div style="width: 40px;"></div> <!-- Заглушка для выравнивания -->
+</div>
+
+<div class="container">
+  <form method="POST" action="/update_wallet">
+    <div class="form-group">
+      <label>Адрес вашего TON-кошелька:</label>
+      <input type="text" name="ton_wallet" 
+             value="{{ user.ton_wallet or '' }}" 
+             placeholder="Начинается с UQA... или EQA..."
+             style="width:100%; padding:10px; margin:10px 0; border: 1px solid #ccc; border-radius: 6px;">
+      <small style="color: #666;">Поддерживаемые кошельки: Tonkeeper, MyTonWallet, Telegram Wallet</small>
+    </div>
+    <button type="submit" class="btn">Сохранить кошелёк</button>
+  </form>
   
-  // Обработка подключения
-  tonConnectUI.onStatusChange(wallet => {
-    if (wallet) {
-      // Отправляем адрес на сервер
-      fetch('/update_wallet_tonconnect', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({address: wallet.account.address})
-      }).then(r => r.json()).then(data => {
-        if (data.success) {
-          alert('Кошелёк подключён!');
-          window.location.reload();
-        }
-      });
-    }
-  });
-</script>
+  {% if user.ton_wallet %}
+    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+      <p><strong>Текущий кошелёк:</strong></p>
+      <code style="word-break: break-all;">{{ user.ton_wallet }}</code>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -44,12 +44,56 @@
   .status-pending { background: #ff9800; color: white; }
   .status-approved { background: var(--success); color: white; }
   .status-rejected { background: var(--danger); color: white; }
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
 </style>
 
 <div class="admin-header">
   <h1>👨‍🏫 Админка EduChain</h1>
   <div style="display: flex; gap: 10px; align-items: center;">
-    <a href="/admin/nft_certificates" class="menu-item">🎓 NFT Грамоты</a>
     <a href="/admin/verification" class="proofs-link">🔍 Верификация</a>
     <a href="/admin/proofs" class="proofs-link">📄 Доказательства</a>
     <a href="/admin/logout" class="proofs-link" style="background: rgba(244,67,54,0.2);">🚪 Выйти</a>
@@ -64,10 +108,20 @@
         <select name="user_id" required>
           <option value="">Выберите ученика</option>
           {% for student in students %}
-          <option value="{{ student.id }}">{{ student.last_name }} {{ student.first_name }} {{ student.grade }}</option>
+          <option value="{{ student.id }}">{{ student.last_name }} {{ student.first_name }} ({{ student.grade }})</option>
           {% endfor %}
         </select>
-        <input type="number" name="amount" min="1" placeholder="Сумма" required>
+        
+        <!-- Переключатель Jetton -->
+        <div class="switch-container">
+          <label class="switch">
+            <input type="checkbox" name="use_jetton" id="useJetton">
+            <span class="slider"></span>
+          </label>
+          <span>Выдать Jetton вместо обычных токенов</span>
+        </div>
+        
+        <input type="number" name="amount" min="0.01" step="0.01" placeholder="Сумма" required>
         <button type="submit" class="btn btn-primary">Выдать</button>
       </form>
     </div>
@@ -129,4 +183,20 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+  // Обновляем плейсхолдер при переключении
+  document.getElementById('useJetton').addEventListener('change', function() {
+    const amountInput = document.querySelector('input[name="amount"]');
+    if (this.checked) {
+      amountInput.min = "0.01";
+      amountInput.step = "0.01";
+      amountInput.placeholder = "Сумма в Jetton (например: 10.5)";
+    } else {
+      amountInput.min = "1";
+      amountInput.step = "1";
+      amountInput.placeholder = "Сумма в обычных токенах";
+    }
+  });
+</script>
 {% endblock %}

@@ -56,20 +56,38 @@ def panel():
 
 @bp.route('/award', methods=['POST'])
 @admin_required
+@bp.route('/award', methods=['POST'])
+@admin_required
 def award():
     user_id = int(request.form['user_id'])
-    amount = int(request.form['amount'])
+    amount = float(request.form['amount'])
+    use_jetton = 'use_jetton' in request.form
     
-    balance = TokenBalance.query.filter_by(user_id=user_id).first()
-    if not balance:
-        balance = TokenBalance(user_id=user_id, balance=0)
-        db.session.add(balance)
+    user = User.query.get(user_id)
+    if not user:
+        flash("❌ Ученик не найден", "error")
+        return redirect('/admin/panel')
     
-    balance.balance += amount
-    tx = Transaction(user_id=user_id, type='award', amount=amount, description="Начислено админом")
-    db.session.add(tx)
-    db.session.commit()
-    return redirect(url_for('admin.panel'))
+    if use_jetton:
+        # Проверяем наличие кошелька
+        if not user.ton_wallet:
+            flash("❌ У ученика нет TON-кошелька для получения Jetton", "error")
+            return redirect('/admin/panel')
+        
+        try:
+            # Конвертируем в минимальные единицы (decimals=9)
+            jetton_amount = int(amount * 1e9)
+            asyncio.run(send_jetton(user.ton_wallet, jetton_amount))
+            flash(f"✅ Выдано {amount} Jetton ученику {user.last_name}!", "success")
+        except Exception as e:
+            flash(f"❌ Ошибка Jetton: {str(e)}", "error")
+    else:
+        # Выдача обычных токенов (ваш существующий функционал)
+        user.tokens = (user.tokens or 0) + int(amount)
+        db.session.commit()
+        flash(f"✅ Выдано {int(amount)} токенов ученику {user.last_name}!", "success")
+    
+    return redirect('/admin/panel')
 
 @bp.route('/add_reward', methods=['POST'])
 @admin_required
