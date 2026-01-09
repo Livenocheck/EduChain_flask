@@ -56,8 +56,6 @@ def panel():
 
 @bp.route('/award', methods=['POST'])
 @admin_required
-@bp.route('/award', methods=['POST'])
-@admin_required
 def award():
     user_id = int(request.form['user_id'])
     amount = float(request.form['amount'])
