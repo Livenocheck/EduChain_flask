@@ -13,4 +13,4 @@ class User(db.Model):
     grade = db.Column(db.String(10))
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'), nullable=False)
     role = db.Column(db.String(20), default="student")  # "student", "admin"
-    # ton_wallet = db.Column(db.String(100), nullable=True)
+    ton_wallet = db.Column(db.String(100))

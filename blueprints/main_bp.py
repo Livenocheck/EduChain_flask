@@ -1,12 +1,13 @@
 from flask import Blueprint, request, render_template, jsonify, session, redirect, url_for, flash
 from functools import wraps
 from telegram_tools.telegram_auth import validate_init_data, get_or_create_student
-import json
+import json, os
 from models import db
 from models.user import User
 from models.token_balance import TokenBalance
 from models.transaction import Transaction
 from models.reward import Reward
+from models.nft_certificate import NFTCertificate
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
@@ -120,3 +121,62 @@ def purchase_history():
     balance = balance_obj.balance if balance_obj else 0
     
     return render_template('history.html', student=user, balance=balance, purchases=purchases, rewards=rewards)
+
+@bp.route('/wallet')
+@student_required
+def wallet_page():
+    user = User.query.get(session['user_id'])
+    return render_template('wallet.html', user=user)
+
+@bp.route('/update_wallet', methods=['POST'])
+@student_required
+def update_wallet():
+    user = User.query.get(session['user_id'])
+    wallet_address = request.form.get('ton_wallet', '').strip()
+    
+    if wallet_address:
+        # Валидация адреса TON
+        if not wallet_address.startswith(('UQ', 'EQ')):
+            flash("❌ Неверный формат адреса", "error")
+            return redirect('/wallet')
+        user.ton_wallet = wallet_address
+        db.session.commit()
+        flash("✅ Кошелёк сохранён!", "success")
+    else:
+        user.ton_wallet = None
+        db.session.commit()
+        flash("ℹ️ Кошелёк удалён", "info")
+    
+    return redirect('/wallet')
+
+@bp.route('/update_wallet_tonconnect', methods=['POST'])
+@student_required
+def update_wallet_tonconnect():
+    data = request.json
+    address = data.get('address', '')
+    
+    if address.startswith(('UQ', 'EQ')):
+        user = User.query.get(session['user_id'])
+        user.ton_wallet = address
+        db.session.commit()
+        return jsonify({"success": True})
+    
+    return jsonify({"success": False}), 400
+
+@bp.route('/api/nft/cert/<int:cert_id>.json')
+def nft_cert_metadata(cert_id):
+    cert = NFTCertificate.query.get(cert_id)
+    if not cert or cert.status != "minted":
+        return jsonify({"error": "Not found"}), 404
+    
+    user = User.query.get(cert.owner_user_id)
+    return jsonify({
+        "name": f"Грамота: {user.last_name} {user.first_name}",
+        "description": cert.description,
+        "image": f"https://{os.getenv('DOMAIN')}/static/nft_uploads/{cert.filename}",
+        "attributes": [
+            {"trait_type": "Ученик", "value": f"{user.last_name} {user.first_name}"},
+            {"trait_type": "Класс", "value": user.grade or "—"},
+            {"trait_type": "Дата", "value": cert.created_at.strftime("%d.%m.%Y")}
+        ]
+    })

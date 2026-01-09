@@ -1,4 +1,4 @@
-import os
+import os, asyncio
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash
 from models import db
 from models.user import User
@@ -9,6 +9,10 @@ from models.school import School
 from models.proof import Proof
 from werkzeug.utils import secure_filename
 from functools import wraps
+from ton_tools.client import send_jetton
+from models.nft_certificate import NFTCertificate
+from datetime import datetime
+from ton_tools.nft import mint_nft_to
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -176,3 +180,73 @@ def reject_verification(user_id):
 def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('admin.login'))
+
+@bp.route('/award_jetton/<int:user_id>', methods=['POST'])
+@admin_required
+def award_jetton(user_id):
+    user = User.query.get(user_id)
+    if not user or not user.ton_wallet:
+        flash("❌ Ученик не найден или нет кошелька", "error")
+        return redirect(request.referrer or '/admin/panel')
+    
+    try:
+        amount = float(request.form['amount'].replace(',', '.'))
+        # Конвертируем в минимальные единицы (decimals=9)
+        jetton_amount = int(amount * 1e9)
+        
+        asyncio.run(send_jetton(user.ton_wallet, jetton_amount))
+        flash(f"✅ Выдано {amount} EDU ученику {user.last_name}!", "success")
+    except Exception as e:
+        flash(f"❌ Ошибка: {str(e)}", "error")
+    
+    return redirect(request.referrer or '/admin/panel')
+
+@bp.route('/nft_certificates')
+@admin_required
+def nft_certificates():
+    students = User.query.filter_by(verified=True).all()
+    return render_template('admin_nft.html', students=students)
+
+@bp.route('/mint_nft', methods=['POST'])
+@admin_required
+def mint_nft():
+    user_id = request.form['student_id']
+    description = request.form['description'].strip()
+    file = request.files.get('file')
+    
+    if not file or not user_id or not description:
+        flash("❌ Заполните все поля", "error")
+        return redirect('/nft_certificates')
+    
+    # Сохраняем файл
+    filename = secure_filename(file.filename)
+    upload_path = os.path.join('static', 'nft_uploads', filename)
+    os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+    file.save(upload_path)
+    
+    # Создаём запись
+    nft_cert = NFTCertificate(
+        owner_user_id=user_id,
+        filename=filename,
+        description=description
+    )
+    db.session.add(nft_cert)
+    db.session.commit()
+    
+    # Минтим NFT
+    try:
+        user = User.query.get(user_id)
+        metadata_url = f"https://{os.getenv('DOMAIN')}/api/nft/cert/{nft_cert.id}.json"
+        tx_hash = asyncio.run(mint_nft_to(user.ton_wallet, metadata_url))
+        
+        nft_cert.transaction_hash = tx_hash
+        nft_cert.status = "minted"
+        nft_cert.minted_at = datetime.utcnow()
+        db.session.commit()
+        flash("✅ NFT грамота создана!", "success")
+    except Exception as e:
+        nft_cert.status = "failed"
+        db.session.commit()
+        flash(f"❌ Ошибка: {str(e)}", "error")
+    
+    return redirect('/nft_certificates')

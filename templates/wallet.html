@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h2>👛 Мой TON-кошелёк</h2>
+  
+  <!-- TON Connect (основной способ) -->
+  <div id="ton-connect-button"></div>
+  
+  <!-- Или ручной ввод -->
+  <div style="margin: 30px 0; padding: 20px; border: 1px dashed #ccc; border-radius: 8px;">
+    <h3>Или укажите адрес вручную:</h3>
+    <form method="POST" action="/update_wallet">
+      <input type="text" name="ton_wallet" 
+             value="{{ user.ton_wallet or '' }}" 
+             placeholder="UQA... или EQA..."
+             style="width:100%; padding:10px; margin:10px 0;">
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+  </div>
+  
+  {% if user.ton_wallet %}
+    <p>Текущий кошелёк: <code>{{ user.ton_wallet }}</code></p>
+  {% endif %}
+</div>
+
+<style>
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+  .btn { background: #0088cc; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; }
+</style>
+
+<!-- TON Connect SDK -->
+<script src="https://unpkg.com/@tonconnect/ui@1.0.0/dist/tonconnect-ui.min.js"></script>
+<script>
+  // Инициализация TON Connect
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://{{ DOMAIN }}/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect-button'
+  });
+  
+  // Обработка подключения
+  tonConnectUI.onStatusChange(wallet => {
+    if (wallet) {
+      // Отправляем адрес на сервер
+      fetch('/update_wallet_tonconnect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({address: wallet.account.address})
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          alert('Кошелёк подключён!');
+          window.location.reload();
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

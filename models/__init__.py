@@ -8,3 +8,4 @@ from .token_balance import TokenBalance
 from .reward import Reward
 from .transaction import Transaction
 from .proof import Proof
+from .nft_certificate import NFTCertificate
