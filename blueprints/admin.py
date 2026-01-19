@@ -208,7 +208,7 @@ def mint_nft():
     
     if not file or not user_id or not description:
         flash("❌ Заполните все поля", "error")
-        return redirect('/nft_certificates')
+        return redirect('/admin/nft_certificates')
     
     # Сохраняем файл
     filename = secure_filename(file.filename)
@@ -242,4 +242,4 @@ def mint_nft():
     except Exception as e:
         pass
     
-    return redirect('/nft_certificates')
+    return redirect('/admin/nft_certificates')
