@@ -54,7 +54,33 @@ def panel():
     rewards = Reward.query.filter_by(school_id=school.id).all()
     return render_template('admin.html', students=students, rewards=rewards)
 
+@bp.route('/award', methods=['POST'])
+@admin_required
+def award():
+    user_id = int(request.form['user_id'])
+    amount = float(request.form['amount'])
+    
+    user = User.query.get(user_id)
+    if not user:
+        flash("❌ Ученик не найден", "error")
+        return redirect('/admin/panel')
 
+    else:
+        # Выдача обычных токенов через TokenBalance
+        from models.token_balance import TokenBalance
+        
+        # Получаем или создаём запись баланса
+        token_balance = TokenBalance.query.filter_by(user_id=user_id).first()
+        if not token_balance:
+            token_balance = TokenBalance(user_id=user_id, balance=0)
+            db.session.add(token_balance)
+        
+        # Обновляем баланс
+        token_balance.balance += int(amount)
+        db.session.commit()
+        flash(f"✅ Выдано {int(amount)} токенов ученику {user.last_name}!", "success")
+    
+    return redirect('/admin/panel')
 
 @bp.route('/add_reward', methods=['POST'])
 @admin_required
