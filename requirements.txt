@@ -5,5 +5,5 @@ flask-migrate
 python-dotenv
 werkzeug
 PyJWT
-pytonlib
+web3
 gunicorn

@@ -9,10 +9,10 @@ from models.school import School
 from models.proof import Proof
 from werkzeug.utils import secure_filename
 from functools import wraps
-from ton_tools.client import send_jetton
 from models.nft_certificate import NFTCertificate
 from datetime import datetime
-from ton_tools.nft import mint_nft_to
+from blockchain.eth.mint_nft import minter
+from blockchain.eth.generate_metadata import create_metadata
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -54,47 +54,7 @@ def panel():
     rewards = Reward.query.filter_by(school_id=school.id).all()
     return render_template('admin.html', students=students, rewards=rewards)
 
-@bp.route('/award', methods=['POST'])
-@admin_required
-def award():
-    user_id = int(request.form['user_id'])
-    amount = float(request.form['amount'])
-    use_jetton = 'use_jetton' in request.form
-    
-    user = User.query.get(user_id)
-    if not user:
-        flash("❌ Ученик не найден", "error")
-        return redirect('/admin/panel')
-    
-    if use_jetton:
-        # Проверяем наличие кошелька
-        if not user.ton_wallet:
-            flash("❌ У ученика нет TON-кошелька для получения Jetton", "error")
-            return redirect('/admin/panel')
-        
-        try:
-            # Конвертируем в минимальные единицы (decimals=9)
-            jetton_amount = int(amount * 1e9)
-            asyncio.run(send_jetton(user.ton_wallet, jetton_amount))
-            flash(f"✅ Выдано {amount} Jetton ученику {user.last_name}!", "success")
-        except Exception as e:
-            flash(f"❌ Ошибка Jetton: {str(e)}", "error")
-    else:
-        # Выдача обычных токенов через TokenBalance
-        from models.token_balance import TokenBalance
-        
-        # Получаем или создаём запись баланса
-        token_balance = TokenBalance.query.filter_by(user_id=user_id).first()
-        if not token_balance:
-            token_balance = TokenBalance(user_id=user_id, balance=0)
-            db.session.add(token_balance)
-        
-        # Обновляем баланс
-        token_balance.balance += int(amount)
-        db.session.commit()
-        flash(f"✅ Выдано {int(amount)} токенов ученику {user.last_name}!", "success")
-    
-    return redirect('/admin/panel')
+
 
 @bp.route('/add_reward', methods=['POST'])
 @admin_required
@@ -103,7 +63,7 @@ def add_reward():
     filename = None
     if file and file.filename:
         filename = secure_filename(file.filename)
-        file.save(os.path.join('static', 'uploads', filename))
+        file.save(os.path.join('static', 'rewards_md', filename))
     
     school = School.query.first()
     if not school:
@@ -115,7 +75,7 @@ def add_reward():
         name=request.form['name'],
         cost=int(request.form['cost']),
         description=request.form.get('description', ''),
-        image_filename=f"/static/uploads/{filename}",
+        image_filename=f"/static/rewards_md/{filename}",
         quantity=int(request.form['quantity']) if request.form.get('quantity') else None,
         school_id=school.id
     )
@@ -206,26 +166,6 @@ def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('admin.login'))
 
-@bp.route('/award_jetton/<int:user_id>', methods=['POST'])
-@admin_required
-def award_jetton(user_id):
-    user = User.query.get(user_id)
-    if not user or not user.ton_wallet:
-        flash("❌ Ученик не найден или нет кошелька", "error")
-        return redirect(request.referrer or '/admin/panel')
-    
-    try:
-        amount = float(request.form['amount'].replace(',', '.'))
-        # Конвертируем в минимальные единицы (decimals=9)
-        jetton_amount = int(amount * 1e9)
-        
-        asyncio.run(send_jetton(user.ton_wallet, jetton_amount))
-        flash(f"✅ Выдано {amount} EDU ученику {user.last_name}!", "success")
-    except Exception as e:
-        flash(f"❌ Ошибка: {str(e)}", "error")
-    
-    return redirect(request.referrer or '/admin/panel')
-
 @bp.route('/nft_certificates')
 @admin_required
 def nft_certificates():
@@ -236,6 +176,7 @@ def nft_certificates():
 @admin_required
 def mint_nft():
     user_id = request.form['student_id']
+    name = request.form['name']
     description = request.form['description'].strip()
     file = request.files.get('file')
     
@@ -261,8 +202,12 @@ def mint_nft():
     # Минтим NFT
     try:
         user = User.query.get(user_id)
-        metadata_url = f"https://{os.getenv('DOMAIN')}/api/nft/cert/{nft_cert.id}.json"
-        tx_hash = asyncio.run(mint_nft_to(user.ton_wallet, metadata_url))
+        DOMAIN = os.getenv('DOMAIN')
+        img_url = DOMAIN + upload_path
+        metadata_uri = create_metadata(name=name, description=description, image_url=img_url)
+        
+        minter(user.eth_wallet, metadata_uri)
+        tx_hash = minter(user.eth_wallet, metadata_uri)
         
         nft_cert.transaction_hash = tx_hash
         nft_cert.status = "minted"
@@ -270,8 +215,6 @@ def mint_nft():
         db.session.commit()
         flash("✅ NFT грамота создана!", "success")
     except Exception as e:
-        nft_cert.status = "failed"
-        db.session.commit()
-        flash(f"❌ Ошибка: {str(e)}", "error")
+        pass
     
     return redirect('/nft_certificates')
