@@ -56,9 +56,9 @@
   <form method="POST" action="/update_wallet">
     <div class="form-group">
       <label>Адрес вашего TON-кошелька:</label>
-      <input type="text" name="ton_wallet" 
-             value="{{ user.ton_wallet or '' }}" 
-             placeholder="Начинается с UQA... или EQA..."
+      <input type="text" name="eth_wallet" 
+             value="{{ user.eth_wallet or '' }}" 
+             placeholder="Начинается с 0x..."
              style="width:100%; padding:10px; margin:10px 0; border: 1px solid #ccc; border-radius: 6px;">
       <small style="color: #666;">Поддерживаемые кошельки: Tonkeeper, MyTonWallet, Telegram Wallet</small>
     </div>

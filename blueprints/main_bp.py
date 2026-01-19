@@ -132,36 +132,22 @@ def wallet_page():
 @student_required
 def update_wallet():
     user = User.query.get(session['user_id'])
-    wallet_address = request.form.get('ton_wallet', '').strip()
+    wallet_address = request.form.get('eth_wallet', '').strip()
     
     if wallet_address:
-        # Валидация адреса TON
-        if not wallet_address.startswith(('UQ', 'EQ')):
+        # Валидация адреса eth
+        if not wallet_address.startswith('0x'):
             flash("❌ Неверный формат адреса", "error")
             return redirect('/wallet')
-        user.ton_wallet = wallet_address
+        user.eth_wallet = wallet_address
         db.session.commit()
         flash("✅ Кошелёк сохранён!", "success")
     else:
-        user.ton_wallet = None
+        user.eth_wallet = None
         db.session.commit()
         flash("ℹ️ Кошелёк удалён", "info")
     
     return redirect('/wallet')
-
-@bp.route('/update_wallet_tonconnect', methods=['POST'])
-@student_required
-def update_wallet_tonconnect():
-    data = request.json
-    address = data.get('address', '')
-    
-    if address.startswith(('UQ', 'EQ')):
-        user = User.query.get(session['user_id'])
-        user.ton_wallet = address
-        db.session.commit()
-        return jsonify({"success": True})
-    
-    return jsonify({"success": False}), 400
 
 @bp.route('/api/nft/cert/<int:cert_id>.json')
 def nft_cert_metadata(cert_id):
