@@ -230,7 +230,7 @@ def mint_nft():
         user = User.query.get(user_id)
         DOMAIN = os.getenv('DOMAIN')
         img_url = ('https://' + DOMAIN + '/' + upload_path).replace(' ', '_')
-        metadata_uri = ('https://' + DOMAIN + '/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
+        metadata_uri = ('https://' + DOMAIN + '/static/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
 
         tx_hash = minter(user.eth_wallet, metadata_uri)
         
