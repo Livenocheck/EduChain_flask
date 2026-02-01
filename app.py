@@ -15,7 +15,11 @@ def create_app():
     app.config.from_object('config.Config')
     
     # Создаём папку для загрузок
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    subdirs = app.config['SUBFOLDERS']
+    
+    for subdir in subdirs:
+        mpath = os.path.join(app.config['UPLOAD_FOLDER'], subdir)
+        os.makedirs(mpath, exist_ok=True)
     
     
     # Инициализируем БД

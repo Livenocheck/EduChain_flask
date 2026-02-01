@@ -66,6 +66,20 @@ def auth_student():
 @student_required
 def profile():
     user = User.query.get(session['user_id'])
+
+    if not user:
+        # Создаём нового пользователя (данные из Telegram уже есть в сессии)
+        user = User(
+            telegram_id=session.get('telegram_id'),
+            first_name=session.get('first_name', ''),
+            last_name=session.get('last_name', ''),
+            username=session.get('username', ''),
+            role='student',
+            verified=False
+        )
+        db.session.add(user)
+        db.session.commit()
+
     if user.verified:
         return redirect('/')
     

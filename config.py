@@ -16,6 +16,6 @@ class Config:
     BOT_TOKEN = getenv('TG_BOT_TOKEN')
 
     # VK_API_TOKEN = getenv('VK_API_TOKEN')
-
-    UPLOAD_FOLDER = path.join(path.dirname(path.abspath(__file__)), 'static', 'uploads')
+    SUBFOLDERS = ['uploads', 'rewards_md', 'nft_uploads']
+    UPLOAD_FOLDER = path.join(path.dirname(path.abspath(__file__)), 'static')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 

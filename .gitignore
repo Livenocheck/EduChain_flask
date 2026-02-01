@@ -7,7 +7,7 @@ __pycache__/
 
 .venv/
 
-static/uploads/
+static/
 
 .vscode/
 .pycharm/
