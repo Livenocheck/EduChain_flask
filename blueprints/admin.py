@@ -253,7 +253,6 @@ def mint_nft():
                 nft_cert.status = "minted"
                 nft_cert.minted_at = datetime.utcnow()
                 db.session.commit()
-                flash("✅ NFT грамота создана!", "success")
 
             except Exception as e:
                 nft_cert.status = "failed"
