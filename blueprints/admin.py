@@ -13,7 +13,6 @@ from models.nft_certificate import NFTCertificate
 from datetime import datetime
 from blockchain.eth.mint_nft import minter
 from blockchain.eth.generate_metadata import create_metadata
-from app import create_app
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -230,6 +229,8 @@ def mint_nft():
     
     # Минтим NFT
     def background_mint():
+        from app import create_app
+
         virtual_app = create_app()
         with virtual_app.app_context():
             try:
