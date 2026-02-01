@@ -13,6 +13,7 @@ from models.nft_certificate import NFTCertificate
 from datetime import datetime
 from blockchain.eth.mint_nft import minter
 from blockchain.eth.generate_metadata import create_metadata
+from app import create_app
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -224,27 +225,39 @@ def mint_nft():
     )
     db.session.add(nft_cert)
     db.session.commit()
+
+    nft_cert_id = nft_cert.id
     
     # Минтим NFT
     def background_mint():
-        try:
-            user = User.query.get(user_id)
-            DOMAIN = os.getenv('DOMAIN')
-            img_url = ('https://' + DOMAIN + '/' + upload_path).replace(' ', '_')
-            metadata_uri = ('https://' + DOMAIN + '/static/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
+        virtual_app = create_app()
+        with virtual_app.app_context():
+            try:
+                from models.nft_certificate import NFTCertificate
+                from models.user import User
+                
+                nft_cert = NFTCertificate.query.get(nft_cert_id)
+                user = User.query.get(user_id)
+                
+                if not nft_cert or not user:
+                    return
+                
+                DOMAIN = os.getenv('DOMAIN')
+                img_url = ('https://' + DOMAIN + '/' + upload_path).replace(' ', '_')
+                metadata_uri = ('https://' + DOMAIN + '/static/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
 
-            tx_hash = minter(user.eth_wallet, metadata_uri)
-            
-            nft_cert.transaction_hash = tx_hash
-            nft_cert.status = "minted"
-            nft_cert.minted_at = datetime.utcnow()
-            db.session.commit()
-            flash("✅ NFT грамота создана!", "success")
-            
-        except Exception as e:
-            nft_cert.status = "failed"
-            db.session.commit()
-            print(f'MINTING ERROR: {e}')
+                tx_hash = minter(user.eth_wallet, metadata_uri)
+                
+                nft_cert.transaction_hash = tx_hash
+                nft_cert.status = "minted"
+                nft_cert.minted_at = datetime.utcnow()
+                db.session.commit()
+                flash("✅ NFT грамота создана!", "success")
+
+            except Exception as e:
+                nft_cert.status = "failed"
+                db.session.commit()
+                print(f'MINTING ERROR: {e}')
 
     thread = threading.Thread(target=background_mint, daemon=True)
     thread.start()
