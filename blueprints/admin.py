@@ -229,8 +229,8 @@ def mint_nft():
     try:
         user = User.query.get(user_id)
         DOMAIN = os.getenv('DOMAIN')
-        img_url = DOMAIN + upload_path
-        metadata_uri = DOMAIN + upload_path + create_metadata(name=name, description=description, image_url=img_url)
+        img_url = 'https://' + DOMAIN + upload_path
+        metadata_uri = 'https://' + DOMAIN + create_metadata(name=name, description=description, image_url=img_url)
 
         tx_hash = minter(user.eth_wallet, metadata_uri)
         
@@ -240,6 +240,6 @@ def mint_nft():
         db.session.commit()
         flash("✅ NFT грамота создана!", "success")
     except Exception as e:
-        pass
+        print(f'MINTING ERROR: {e}')
     
     return redirect('/admin/nft_certificates')
