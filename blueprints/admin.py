@@ -1,4 +1,4 @@
-import os, asyncio
+import os, threading
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash
 from models import db
 from models.user import User
@@ -226,20 +226,29 @@ def mint_nft():
     db.session.commit()
     
     # Минтим NFT
-    try:
-        user = User.query.get(user_id)
-        DOMAIN = os.getenv('DOMAIN')
-        img_url = ('https://' + DOMAIN + '/' + upload_path).replace(' ', '_')
-        metadata_uri = ('https://' + DOMAIN + '/static/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
+    def background_mint():
+        try:
+            user = User.query.get(user_id)
+            DOMAIN = os.getenv('DOMAIN')
+            img_url = ('https://' + DOMAIN + '/' + upload_path).replace(' ', '_')
+            metadata_uri = ('https://' + DOMAIN + '/static/' + create_metadata(name=name, description=description, image_url=img_url)).replace(' ', '_')
 
-        tx_hash = minter(user.eth_wallet, metadata_uri)
-        
-        nft_cert.transaction_hash = tx_hash
-        nft_cert.status = "minted"
-        nft_cert.minted_at = datetime.utcnow()
-        db.session.commit()
-        flash("✅ NFT грамота создана!", "success")
-    except Exception as e:
-        print(f'MINTING ERROR: {e}')
+            tx_hash = minter(user.eth_wallet, metadata_uri)
+            
+            nft_cert.transaction_hash = tx_hash
+            nft_cert.status = "minted"
+            nft_cert.minted_at = datetime.utcnow()
+            db.session.commit()
+            flash("✅ NFT грамота создана!", "success")
+            
+        except Exception as e:
+            nft_cert.status = "failed"
+            db.session.commit()
+            print(f'MINTING ERROR: {e}')
+
+    thread = threading.Thread(target=background_mint, daemon=True)
+    thread.start()
+
+    flash("✅ NFT грамота в процессе создания!", "success")
     
     return redirect('/admin/nft_certificates')
