@@ -22,8 +22,10 @@ def minter(to_address: str, token_uri: str):
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
     assert w3.is_connected(), "❌ Не подключился к Sepolia"
 
+    abi_file = os.path.join('blockchain', 'eth', 'EduNFT.abi')
+
     # === Загрузка ABI ===
-    with open("EduNFT.abi", "r") as f:
+    with open(abi_file, "r") as f:
         abi = json.load(f)
 
     # === Чтение адреса контракта ===
